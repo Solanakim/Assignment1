@@ -1,0 +1,76 @@
+﻿@using HomePage.Models;
+@using System.Web.UI.WebControls;
+
+@model List<HomePage.Models.Members>
+@{
+    //List<Members> list = ViewBag.list;
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_DefaultPageLayoutPage.cshtml";
+}
+
+<!-- Page Heading/Breadcrumbs -->
+<h1 class="mt-4 mb-3">User List</h1>
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="/Home/Index">Home</a>
+    </li>
+    <li class="breadcrumb-item active">User List</li>
+</ol>
+
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <table class="table table-bordered" style="width:100%; ">
+            <thead>
+                <tr>
+                    <th width="10%">No</th>
+                    <th width="10%">User ID</th>
+                    <th width="20%">User Name</th>
+                    <th width="20%">Phone Number</th>
+                    <th width="20%">Email Address</th>
+                    <th width="20%">Register Date</th>
+                </tr>
+            </thead>
+            <tbody id="userList">
+                @{
+                    int i = 0;
+                    int idx = 0;
+                }
+                @foreach (var item in Model)
+                {
+                    idx = Model.Count - i;
+                    <tr>
+                        <td>@idx.ToString()</td>
+                        <td><a href="/Member/Edit?memberid=@item.MemberID">@item.MemberID</a></td>
+                        <td>@item.MemberName</td>
+                        <td>@item.Telephone</td>
+                        <td>@item.Email</td>
+                        <td>@Convert.ToDateTime(item.EntryDate).ToString("yyyy.MM.dd")</td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" style="text-align:center;">
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        jQuery(function ($) {
+            $('.table').footable({
+                "paging": {
+                    "enabled": true,
+                    "position": "right"
+                }
+            });
+        });
+
+    </script>
+}
+

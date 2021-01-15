@@ -1,0 +1,207 @@
+﻿@using HomePage.Models;
+@using System.Web.UI.WebControls;
+
+@model HomePage.Models.Members
+@{
+    ViewBag.Title = "Entry";
+    Layout = "~/Views/Shared/_DefaultPageLayoutPage.cshtml";
+}
+
+<!-- Page Heading/Breadcrumbs -->
+<h1 class="mt-4 mb-3">Join</h1>
+
+<ol class="breadcrumb" >
+    <li class="breadcrumb-item">
+        <a href="/Home/Index">Home</a>
+    </li>
+    <li class="breadcrumb-item active">Join</li>
+</ol>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        @*<h3>Send us a Feedback</h3>*@
+        @*<form name="sentMessage" id="contactForm" novalidate>*@
+        <form method="post" action="@Url.Action("Entry", "Member")" name="sentMessage" id="contactForm" novalidate>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>ID</label>
+                    @*<input type="text" class="form-control" id="name" required data-validation-required-message="Please enter your name.">*@                   
+                    <div class="input-group">                        
+                        @Html.TextBoxFor(m => m.MemberID, new { placeholder = "Please enter your ID", @class = "form-control", @required = "required" })
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="button" onclick="fnDuplicationCheck()">Duplication Check</button>
+                        </span>
+                        <p class="help-block"></p>
+                    </div>
+                </div>
+              </div>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>Full Name</label>
+                    @*<input type="tel" class="form-control" id="phone" required data-validation-required-message="Please enter your phone number.">*@
+                    @Html.TextBoxFor(m => m.MemberName, new { placeholder = "Please enter your Name", @class= "form-control" , @required = "required" })
+                    
+                </div>
+            </div>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>Password</label>
+                    @*<input type="email" class="form-control" id="email" required data-validation-required-message="Please enter your email address.">*@
+                    @Html.TextBoxFor(m => m.MemberPWD, new { placeholder = "Please enter your password", @class = "form-control", @required = "required" })
+                </div>
+            </div>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>Email Address</label>
+                    @*<input type="email" class="form-control" id="email" required data-validation-required-message="Please enter your email address.">*@
+                    @Html.TextBoxFor(m => m.Email, new { PlaceHolder = "Please enter your email address.", @class = "form-control", @required = "required" })
+                </div>
+            </div>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>Phone Number</label>
+                    @*<input type="email" class="form-control" id="email" required data-validation-required-message="Please enter your email address.">*@
+                    @Html.TextBoxFor(m => m.Telephone, new { PlaceHolder = "Please enter your phone number.", @class = "form-control", @required = "required" })
+                </div>
+            </div>
+            @*<div class="control-group form-group">
+                <div class="controls">
+                    <label>Message:</label>
+                    <textarea rows="10" cols="100" class="form-control" id="message" required data-validation-required-message="Please enter your message" maxlength="999" style="resize:none"></textarea>
+                </div>
+            </div>*@
+            <div id="success"></div>
+            <!-- For success/fail messages -->
+            <button type="submit" class="btn btn-primary" id="submitBtn" onclick="return fnSaveCheck();" disabled>Submit</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts{ 
+<script>
+    $(document).ready(function () {
+        var result = '@ViewBag.Result';       //처음 페이지를 로드 할 때는  result 내용이 없어서 그냥 페이지 뜸 .
+
+        //회원가입 
+        if (result == "OK") {
+            swal({
+                title: "Succesfully Joined",
+                //text: "You clicked the button!",
+                icon: "success",
+            });
+        }
+        else if (result == "FAIL") {
+            swal({
+                title: "Join Failed",
+                //text: "You clicked the button!",
+                icon: "warning",
+            });
+        }
+    })
+
+
+    var oldVal = "";
+    //아이디가 변경되면 제출 버튼 disabled 하기
+    $("#MemberID").on("propertychange change keyup paste input", function () {
+        var currentVal = $(this).val();
+        if (currentVal == oldVal) {
+            return;
+        }
+
+        oldVal = currentVal;
+        $("#submitBtn").attr("disabled","true");
+    });
+
+
+    //회원 가입 전 체크하기
+    function fnSaveCheck() {
+        if ($("#MemberID").val() == "") {
+            swal({
+                title: "Please enter the ID",
+                //text: "You clicked the button!",
+                icon: "warning",
+            });
+            $('#MemberID').focus();
+            return false;
+        }
+        else if ($("#MemberName").val() == "") {
+            swal({
+                title: "Please enter the Name",
+                //text: "You clicked the button!",
+                icon: "warning",
+            });
+            $('#MemberName').focus();
+            return false;
+        }
+        else if ($("#MemberPWD").val() == "") {
+            swal({
+                title: "Please enter the Password",
+                //text: "You clicked the button!",
+                icon: "warning",
+            });
+            $('#MemberPWD').focus();
+            return false;
+        }
+        return true;
+    }
+
+    //아이디 중복검사 
+    function fnDuplicationCheck() {
+        var ID = $('#MemberID').val();
+
+        if (ID == "") {
+            swal({
+                title: "Please enter the ID",
+                //text: "You clicked the button!",
+                icon: "warning",
+            });
+            return false;
+        }
+
+        $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8 ",
+            url: '/Member/IDCheck?memberid=' + ID,
+            data: "{}",
+            dataType:"json"
+        }).done(function (response) {  //return Json(result, JsonRequestBehavior.AllowGet);
+
+            if (response == "OK") {
+                swal({
+                    title: "Valid ID",
+                    //text: "You clicked the button!",
+                    icon: "success",
+                });
+                $("#submitBtn").removeAttr("disabled");
+            }
+            else {
+                swal({
+                    title: "Duplicated ID",
+                    text: "Please enter another ID",
+                    icon: "warning",
+                });
+                $('#MemberID').val("");
+                $('#MemberID').focus();
+            }
+        })
+            .fail(function (data) {
+                if (data.responseText !== '') {
+                    swal({
+                        title: data.responseText,
+                        //text: "You clicked the button!",
+                        icon: "error",
+                    });
+                }
+                else {
+                    swal({
+                        title: "Error",
+                        //text: "You clicked the button!",
+                        icon: "error",
+                    });
+                }
+            })
+    }
+
+</script>
+}
+

@@ -1,0 +1,94 @@
+﻿@using HomePage.Models;
+@using System.Web.UI.WebControls;
+
+@model IEnumerable<JsonFile>
+@{
+    ViewBag.Title = "Json";
+    Layout = "~/Views/Shared/_SideBarLayoutPage.cshtml";
+}
+
+
+<!-- Page Heading/Breadcrumbs -->
+<h1 class="mt-4 mb-3">Transactions</h1>
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="/Home/Index">Home</a>
+    </li>
+    <li class="breadcrumb-item active">Json List</li>
+</ol>
+
+<div class="row">
+    <!-- Sidebar Column -->
+    <div class="col-lg-3 mb-4">
+        <div class="list-group">
+            <a href="/List/Transactions" class="list-group-item">Transactions List</a>
+            <a href="/List/JsonList" class="list-group-item active">Json List</a>
+        </div>
+    </div>
+    <div class="col-lg-9 mb-4">        
+        <table class="table table-bordered" style="width:100%; ">
+            <thead>
+                <tr>
+                    <th width="20%">번호</th>
+                    <th width="50%">파일 제목</th>
+                    <th width="30%">파일 크기</th>
+                </tr>
+            </thead>
+            <tbody id="jsonList">
+                @{
+                    int i = 0;
+                    int idx = 0;
+                }
+                @foreach (var item in Model)
+                {
+
+                    <tr>
+                        <td>@(i+1)</td>
+                        <td><a href="#" class="link" onclick="clickEvent(`@item.FileName`)">@item.FileName</a></td>
+                        <td>@item.FileSize</td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" style="text-align:center;">
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        function clickEvent(fileName) {
+            //console.log("eventListener");
+            //let fileName = event.target.innerText;
+            window.open(`/List/Json?fileName=${fileName}`, `${fileName}` ,"width=800, height=700, toolbar=no, menubar=no, scrollbars=no, resizable=yes");
+        }
+
+
+        //function init() {
+        //    var elements = document.getElementsByClassName("link");
+        //    Array.prototype.forEach.call(elements, function (item, index) {
+        //        item.addEventListener("click", clickEvent);
+        //    });
+        //    console.log(elements);
+        //}
+
+        //init();
+
+
+        $(document).ready(function () {
+            $('.table').footable({
+                "paging": {
+                    "enabled": true,
+                    "position": "right"
+                }
+            });             
+        })
+
+    </script>
+}

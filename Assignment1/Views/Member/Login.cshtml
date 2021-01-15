@@ -1,0 +1,148 @@
+﻿@using HomePage.Models;
+@using System.Web.UI.WebControls;
+
+@model HomePage.Models.Members
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LoginPageLayoutPage.cshtml";
+}
+
+<!-- Page Heading/Breadcrumbs -->
+<h1 class="mt-4 mb-3">Login</h1>
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="/Home/Index">Home</a>
+    </li>
+    <li class="breadcrumb-item active">Login</li>
+</ol>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        @*<h3>Send us a Feedback</h3>*@
+        @*<form name="sentMessage" id="contactForm" novalidate>*@
+        <form method="post" action="@Url.Action("Login", "Member")" name="sentMessage" id="contactForm" novalidate>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>ID</label>
+                    @*<input type="text" class="form-control" id="name" required data-validation-required-message="Please enter your name.">*@
+                    <div class="input-group">
+                        @Html.TextBoxFor(m => m.MemberID, new { placeholder = "Please enter your ID", @id = "loginId", @name = "MemberID", @class = "form-control", @required = "required" })
+                        <label>Save ID</label><input type="checkbox" id="idSaveChk" />
+                        <p class="help-block"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>Password</label>
+                    @*<input type="email" class="form-control" id="email" required data-validation-required-message="Please enter your email address.">*@
+                    @Html.TextBoxFor(m => m.MemberPWD, new { type = "password", placeholder = "Please enter your password", @name = "MemberPWD", @class = "form-control", @required = "required" })
+                </div>
+            </div>
+            <div id="success"></div>
+            <!-- For success/fail messages -->
+            <button type="submit" class="btn btn-primary" id="submitBtn">Sign In</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var result = '@ViewBag.Result';       //처음 페이지를 로드 할 때는  result 내용이 없어서 그냥 페이지 뜸.
+            let loginDate = "@ViewBag.LoginDate";
+            let savedId = getCookie("userInputId");
+
+
+            //if (savedId !== '' && savedId !== null) {
+            //    $("#loginId").val(savedId);
+            //    $("input:checkbox[id='idSaveChk']").prop("checked", true);
+            //    console.log(savedId)
+            //}
+          
+            $("#loginId").val(savedId);  //쿠키에 저장 된 값 가져오기
+
+            if ($("#loginId").val() != "") { // 그 전에 ID를 저장해서 처음 페이지 로딩
+                // 아이디 저장하기 체크되어있을 시,
+                $("#idSaveChk").attr("checked", true); // ID 저장하기를 체크 상태로 두기.
+            }
+
+            $("#idSaveChk").change(function () { // 체크박스에 변화가 발생시
+                if ($("#idSaveChk").is(":checked")) { // ID 저장하기 체크했을 때,
+                    var userInputId = $("#loginId").val();
+                    setCookie("userInputId", userInputId, 7); // 7일 동안 쿠키 보관
+                } else { // ID 저장하기 체크 해제 시,
+                    setCookie("userInputId","",0);
+                }
+            });
+
+            // ID 저장하기를 체크한 상태에서 ID를 입력하는 경우, 이럴 때도 쿠키 저장.
+            $("input[name='loginId']").keyup(function () { // ID 입력 칸에 ID를 입력할 때,
+                if ($("#idSaveChk").is(":checked")) { // ID 저장하기를 체크한 상태라면,
+                    var userInputId = $("#loginId").val();
+                    setCookie("userInputId", userInputId, 7); // 7일 동안 쿠키 보관
+                }
+            });
+
+            //로그인
+        if (result == "OK" && loginDate !==null) {
+            swal({
+                title: "Succesfully Signed In!",
+                text: loginDate,
+                icon: "success",
+            }).then((value) => {              
+                sessionStorage.setItem("Id", '@ViewBag.ID');
+                window.location.href = "/List/Transactions";
+            });
+        }
+        else if (result == "FAIL") {
+            swal({
+                title: "Sign In Failed",
+                text: "Check ID and PW again.",
+                icon: "warning",
+            });
+        }
+
+        //    $("#submitBtn").click(() => {
+        //        let formData = new FormData(document.getElementById('contactForm'));
+
+        //        $.ajax({
+        //            type: "POST",
+        //            enctype: 'multipart/form-data',
+        //            processData: false,
+        //            contentType: false,
+        //            url: '/Member/Login',
+        //            data: formData,
+        //            dataType: "xml",
+        //            done: function (response) {
+        //                swal({
+        //                    title: "Succesfully Signed In!",
+        //                    text: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()}:${date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()}:${date.getSeconds() < 9 ? `0${date.getSeconds()}` : date.getSeconds()}.json`,
+        //                    icon: "success",
+        //                }).then((value) => {
+        //                    if (document.getElementById("idSaveChk").checked == true) {
+        //                        setCookie("Cookie_id", response.MemberID, "15");
+        //                    }
+        //                    else {
+        //                        deleteCookie("Cookie_id");
+        //                    }
+        //                    sessionStorage.setItem("Id", response.MemberID);
+        //                    window.location.href = "/List/Transactions";
+        //                });
+        //            }, error: function (e) {
+        //                console.log(e);
+        //                swal({
+        //                    title: "Sign In Failed",
+        //                    text: "Check ID and PW again.",
+        //                    icon: "warning",
+        //                });
+        //            }
+        //        });
+        //    });
+        })
+
+    </script>
+}
+

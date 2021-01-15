@@ -1,0 +1,74 @@
+﻿@using HomePage.Models;
+@using System.Web.UI.WebControls;
+
+@model IEnumerable<Statement>
+@{
+    //List<Members> list = ViewBag.list;
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_SideBarLayoutPage.cshtml";
+}
+
+<!-- Page Heading/Breadcrumbs -->
+<h1 class="mt-4 mb-3">Transactions</h1>
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="/Home/Index">Home</a>
+    </li>
+    <li class="breadcrumb-item active">Json</li>
+</ol>
+
+<div class="row">
+    <!-- Sidebar Column -->
+    <div class="col-lg-3 mb-4">
+        <div class="list-group">
+            <a href="/List/Transactions" class="list-group-item">Transactions List</a>
+            <a href="/List/JsonList" class="list-group-item active">Json List</a>
+        </div>
+    </div>
+    <div class="col-lg-9 mb-4">
+        <table class="table table-bordered" style="width:100%; ">
+            <thead>
+                <tr>
+                    <th width="15%">번호</th>
+                    <th width="15%">승인번호</th>
+                    <th width="20%">가맹점명</th>
+                    <th width="20%">이용일시</th>
+                    <th width="20%">구분</th>
+                    <th width="10%">이용금액</th>
+                    <th width="20%">비고</th>
+
+                </tr>
+            </thead>
+            <tbody id="transactionsList">
+                @{
+                    int i = 0;
+                    int idx = 0;
+                }
+                @foreach (var item in Model)
+                {
+                    idx = i + 1;
+
+                        <tr>
+                            <td>@idx.ToString()</td>
+                            <td>@item.ReferenceNumber</td>
+                            <td>@item.MerchantName</td>
+                            <td>@item.TransDate</td>
+                            <td>@item.Type</td>
+                            <td>@item.Amount</td>
+                            <td>@item.Content</td>
+                        </tr>
+                  
+                    i++;
+
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="7" style="text-align:center;">
+                    </td>
+                </tr>
+            </tfoot>
+        </table>      
+    </div>
+</div>

@@ -1,0 +1,67 @@
+﻿@using HomePage.Models
+@model List<Articles>
+@{
+    ViewBag.Title = "ArticleList";
+    Layout = "~/Views/Shared/_SideBarLayoutPage.cshtml";
+}
+
+<!-- Page Heading/Breadcrumbs -->
+<h1 class="mt-4 mb-3">F&A</h1>
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="/Home/Index">Home</a>
+    </li>
+    <li class="breadcrumb-item active">F&A</li>
+    <li class="breadcrumb-item active">New Inquiry</li>
+</ol>
+
+<!-- Content Row -->
+<div class="row">
+    <!-- Sidebar Column -->
+    <div class="col-lg-3 mb-4">
+        <div class="list-group">
+            <a href="/Board/Create" class="list-group-item">New Inquiry</a>
+            <a href="/Board/ArticleList" class="list-group-item active">Inquiry List</a>
+        </div>
+    </div>
+    <!-- Content Column -->
+    <div class="col-lg-9 mb-4">
+        <table class="table table-bordered" style="width:100%; ">
+            <thead>
+                <tr>
+                    <th width="10%">No</th>
+                    <th width="20%">Title</th>
+                    <th width="10%">User ID</th>
+                    <th width="20%">Register Date</th>
+                    <th width="20%">View Cnt</th>
+                </tr>
+            </thead>
+            <tbody id="articleList">
+                @{
+                    int i = 0;
+                    int idx = 0;
+                }
+                @foreach (var item in Model)
+                {
+                    idx = Model.Count - i;
+                    <tr>
+                        <td>@idx.ToString()</td>
+                        <td><a href="/Board/ArticleDetail?articleid=@item.ArticleIDX">@item.Title</a></td>
+                        <td>@item.RegistMemberID</td>
+                        <td>@Convert.ToDateTime(item.RegistDate).ToString("yyyy.MM.dd")</td>                       
+                        <td>@item.ViewCnt</td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" style="text-align:center;">
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<!-- /.row -->

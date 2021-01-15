@@ -1,0 +1,312 @@
+﻿@using HomePage.Models
+@model ArticleViewModel
+@{
+    ViewBag.Title = "ArticleEdit";
+    Layout = "~/Views/Shared/_SideBarLayoutPage.cshtml";
+}
+
+<style>
+    .where {
+        display: block;
+        margin: 25px 15px;
+        font-size: 11px;
+        color: #000;
+        text-decoration: none;
+        font-family: verdana;
+        font-style: italic;
+    }
+
+    .filebox input[type="file"] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        border: 0;
+    }
+
+    .filebox label {
+        display: inline-block;
+        padding: .5em .75em;
+        color: #999;
+        font-size: inherit;
+        line-height: normal;
+        vertical-align: middle;
+        background-color: #fdfdfd;
+        cursor: pointer;
+        border: 1px solid #ebebeb;
+        border-bottom-color: #e2e2e2;
+        border-radius: .25em;
+    }
+
+    /* named upload */
+    .filebox .upload-name {
+        display: inline-block;
+        padding: .5em .75em;
+        font-size: inherit;
+        font-family: inherit;
+        line-height: normal;
+        vertical-align: middle;
+        background-color: #f5f5f5;
+        border: 1px solid #ebebeb;
+        border-bottom-color: #e2e2e2;
+        border-radius: .25em;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        /*   appearance: none;*/
+    }
+
+    .filebox.bs3-primary label {
+        color: #fff;
+        background-color: #5cb85c;
+        border-color: #4cae4c;
+    }
+</style>
+
+<!-- Page Heading/Breadcrumbs -->
+<h1 class="mt-4 mb-3">F&A</h1>
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="/Home/Index">Home</a>
+    </li>
+    <li class="breadcrumb-item active">F&A</li>
+    <li class="breadcrumb-item active">Inquiry List</li>
+    <li class="breadcrumb-item active">Inquiry Detail</li>
+</ol>
+
+<!-- Content Row -->
+<div class="row">
+    <!-- Sidebar Column -->
+    <div class="col-lg-3 mb-4">
+        <div class="list-group">
+            <a href="/Board/Create" class="list-group-item">New Inquiry</a>
+            <a href="/Board/ArticleList" class="list-group-item active">Inquiry List</a>
+        </div>
+    </div>
+    <!-- Content Column -->
+    <div class="col-lg-9 mb-4">
+        <form method="post" action="@Url.Action("ArticleEdit", "Board")" name="sentMessage" id="contactForm" enctype="multipart/form-data" novalidate>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>Title</label>
+                    @*<input type="text" class="form-control" id="name" required data-validation-required-message="Please enter your name.">*@
+                    <div class="input-group">
+                        @Html.TextBoxFor(m => m.Article.Title, new { @class = "form-control", @required = "required" })
+                        @Html.HiddenFor(m => m.Article.ArticleIDX)
+                        <p class="help-block"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>Category</label>
+                    @*<input type="tel" class="form-control" id="phone" required data-validation-required-message="Please enter your phone number.">*@
+                    @Html.DropDownListFor(m => m.Article.Category, new SelectList(new List<object> {
+                        new{value="", text="select" },
+                        new{value="C#", text="C#"},
+                        new{value="JAVA",text="JAVA"},
+                        new{value="C++", text = "C++" } }, "value", "text", Model.Article.Category),
+                        new { style = "width:200px;height:40px;font-size:medium;", @class = "form-control", @required = "required" })
+
+                </div>
+            </div>
+            <div class="control-group form-group">
+                <div class="controls">
+                    <label>Contents</label>
+                    @*<textarea rows="10" cols="100" class="form-control" id="message" required data-validation-required-message="Please enter your message" maxlength="999" style="resize:none"></textarea>*@
+                    @Html.TextAreaFor(m => m.Article.Contents, new { @rows = "10", @cols = "80", maxlength = "999", style = "resize:none;", @class = "form-control", @required = "required" })
+                </div>
+            </div>
+            <div class="control-group form-group">
+                <div class="controls">
+                    @*<label>Attachments(img)</label>*@
+                    @*<input type="text" class="form-control" id="name" required data-validation-required-message="Please enter your name.">*@
+                    <div class="filebox bs3-primary">
+                        <input class="upload-name" value="Select file to upload" disabled="disabled" style="width:350px;">
+                
+                        <label for="file">IMAGE</label>
+                        <input type="file" id="file" name="file" class="upload-hidden">
+                   
+                    </div>
+                </div>
+            </div>
+            <div class="control-group form-group">
+                <div class="controls">
+                    @if(Model.Files !=null) { 
+                            foreach (var file in Model.Files)
+                            {
+                                <img src="@file.FilePath@file.FileName" width="100" height="100" onclick="return fnFileDeleteCheck('@file.FileIDX');" />
+                            }
+                         }
+                </div>
+            </div>
+            <div id="success"></div>
+            <!-- For success/fail messages -->
+            <button type="submit" class="btn btn-primary" id="submitBtn" onclick="return fnSaveCheck();">Submit</button>
+            <button type="button" class="btn btn-danger" id="deleteBtn" onclick="return fnDeleteCheck();">Delete</button>
+            <a href="/Board/ArticleList" class="btn btn-info" style="float:right;">List</a>
+        </form>
+    </div>
+</div>
+<!-- /.row -->
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var result = '@ViewBag.Result';
+
+            if (result == 'OK') {
+                swal({
+                    title: "Succesfully Edited!",
+                    //text: "You clicked the button!",
+                    icon: "success",
+                }).then((value) => {
+                    window.location.href = "/Board/ArticleDetail?articleid=" + $("#ArticleIDX").val();
+                });
+            }
+            else if(result=="FAIL") {
+                swal({
+                    title: "Edit Failed",
+                    //text: "You clicked the button!",
+                    icon: "warning",
+                });
+            }
+            var fileTarget = $('.filebox .upload-hidden');
+
+            fileTarget.on('change', function () {         //값이 변경되면
+                if (window.FileReader) {    //Modern Browser
+                    var filename = $(this)[0].files[0].name;
+                } else {    //old IE
+                    var filename = $(this).val().split('/').pop().split('\\').pop();   //파일명만 추출
+                }
+
+                $(this).siblings('.upload-name').val(filename); //추출한 파일 명 삽입
+            });
+        })
+
+        function fnSaveCheck() {
+            if ($("#Title").val() == "") {
+                swal({
+                    title: "Please fill Title",
+                    //text: "You clicked the button!",
+                    icon: "warning",
+                });
+                $('#Title').focus();
+                return false;
+            }
+            else if ($("#Contents").val() == "") {
+                swal({
+                    title: "Please fill Contents",
+                    //text: "You clicked the button!",
+                    icon: "warning",
+                });
+                $('#Contents').focus();
+                return false;
+            }
+            else if ($("#Category").val() == "") {
+                swal({
+                    title: "Please select Category",
+                    //text: "You clicked the button!",
+                    icon: "warning",
+                });
+                $('#Category').focus();
+                return false;
+            }       
+
+            return true;
+        }
+
+        function fnDeleteCheck() {
+            var param = getParameterByName('articleid');
+            swal({
+                title: "Are you sure?",
+                text: "Once deleted, you will not be able to recover this post!",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+                .then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            type: "GET",
+                            contentType: "application/json; charset=utf-8 ",
+                            url: '/Board/ArticleDelete?articleid=' + param,
+                            data: "{}",
+                            dataType: "json"
+                        }).done(function (response) {
+                            if (response == "OK") {
+                                swal({
+                                    title: "Succesfully Deleted",
+                                    //text: "You clicked the button!",
+                                    icon: "success",
+                                }).then((value) => {
+                                    window.location.href = "/Board/ArticleList";
+                                });
+
+                            }
+                            else {
+                                swal({
+                                    title: "Delete Failed",
+                                    //text: "Please enter another ID",
+                                    icon: "warning",
+                                });
+
+                            }
+                        })
+
+
+                    } else {
+                        return false;
+                    }
+                });
+        }
+
+        function fnFileDeleteCheck(fileIDX) {       
+            swal({
+                title: "Are you sure?",
+                text: "Once deleted, you will not be able to recover this image!",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            })
+                .then((willDelete) => {
+                    if (willDelete) {
+                        $.ajax({
+                            type: "GET",
+                            contentType: "application/json; charset=utf-8 ",
+                            url: '/Board/FileDelete?fileIDX=' + fileIDX,
+                            data: "{}",
+                            dataType: "json"
+                        }).done(function (response) {
+                            if (response == "OK") {
+                                swal({
+                                    title: "Succesfully Deleted",
+                                    //text: "You clicked the button!",
+                                    icon: "success",
+                                }).then((value) => {
+                                    window.reload();
+                                });
+
+                            }
+                            else {
+                                swal({
+                                    title: "Delete Failed",
+                                    //text: "Please enter another ID",
+                                    icon: "warning",
+                                });
+
+                            }
+                        })
+
+
+                    } else {
+                        return false;
+                    }
+                });
+        }
+    </script>
+
+}

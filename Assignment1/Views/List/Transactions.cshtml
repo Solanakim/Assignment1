@@ -1,0 +1,355 @@
+﻿@using HomePage.Models;
+@using System.Web.UI.WebControls;
+
+@*@model IEnumerable<Statement>*@
+@{
+    //List<Members> list = ViewBag.list;
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_SideBarLayoutPage.cshtml";
+}
+
+<style>
+    .where {
+        display: block;
+        margin: 25px 15px;
+        font-size: 11px;
+        color: #000;
+        text-decoration: none;
+        font-family: verdana;
+        font-style: italic;
+    }
+
+    .filebox input[type="file"] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        border: 0;
+    }
+
+    .filebox label {
+        display: inline-block;
+        padding: .5em .75em;
+        color: #999;
+        font-size: inherit;
+        line-height: normal;
+        vertical-align: middle;
+        background-color: #fdfdfd;
+        cursor: pointer;
+        border: 1px solid #ebebeb;
+        border-bottom-color: #e2e2e2;
+        border-radius: .25em;
+    }
+
+    /* named upload */
+    .filebox .upload-name {
+        display: inline-block;
+        padding: .5em .75em;
+        font-size: inherit;
+        font-family: inherit;
+        line-height: normal;
+        vertical-align: middle;
+        background-color: #f5f5f5;
+        border: 1px solid #ebebeb;
+        border-bottom-color: #e2e2e2;
+        border-radius: .25em;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        /*   appearance: none;*/
+    }
+
+    .filebox.bs3-primary label {
+        color: #fff;
+        background-color: #5cb85c;
+        border-color: #4cae4c;
+    }
+</style>
+
+<!-- Page Heading/Breadcrumbs -->
+<h1 class="mt-4 mb-3">Transactions</h1>
+
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="/Home/Index">Home</a>
+    </li>
+    <li class="breadcrumb-item active">Transactions</li>
+</ol>
+
+<div class="row">
+    <!-- Sidebar Column -->
+    <div class="col-lg-3 mb-4">
+        <div class="list-group">
+            <a href="/List/Transactions" class="list-group-item active">Transactions List</a>
+            <a href="/List/JsonList" class="list-group-item">Json List</a>
+        </div>
+    </div>
+    <div class="col-lg-9 mb-4">
+       
+        <form id="fileForm">
+            <div id="fileBox" class="filebox bs3-primary">
+                <input class="upload-name" value="파일을 선택해주세요.(xls,xlsx,json)" disabled="disabled" style="width:350px;">
+
+                <label for="file">UPLOAD</label>
+                <input type="file" id="file" name="file" class="upload-hidden">
+
+            </div>
+        </form>
+        <div id="tableSection" style="display:none;">
+            <table class="table table-bordered" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th width="15%">번호</th>
+                        <th width="15%">승인번호</th>
+                        <th width="20%">가맹점명</th>
+                        <th width="20%">이용일시</th>
+                        <th width="10%">구분</th>
+                        <th width="10%">이용금액</th>
+                        <th width="20%">비고</th>
+
+                    </tr>
+                </thead>
+                <tbody id="transactionsList">
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="7" style="text-align:center;">
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            <button type="button" class="btn btn-primary" id="saveBtn">변경 저장</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+           
+
+            var fileTarget = $('.filebox .upload-hidden');
+
+            fileTarget.on('change', function () {         //값이 변경되면
+                if (window.FileReader) {    //Modern Browser
+                    var filename = $(this)[0].files[0].name;
+                } else {    //old IE
+                    var filename = $(this).val().split('/').pop().split('\\').pop();   //파일명만 추출
+                }
+
+                getFileContent(filename);
+
+                $(this).siblings('.upload-name').val(filename); //추출한 파일 명 삽입
+            });
+
+
+
+            function getFileContent(fileName) {
+                const extension = getExtensionOfFilename(fileName);
+                if (extension == ".json" || extension == ".xls" || extension == ".xlsx") {
+
+                    var fileUpload = $("#file").get(0);
+                    var files = fileUpload.files;
+
+                    var fileData = new FormData();
+
+                    fileData.append(files[0].name, files[0]);
+                    fileData.append("extension", extension);
+
+                    $.ajax({
+                        url: '/List/GetFileContent',
+                        type: "POST",
+                        contentType: false, // Not to set any content header(파일 보낼 때는 지정 안함)
+                        processData: false, // Not to process data
+                        data: fileData,
+                        datatype: "json",
+                        success: function (result) {
+                            let data = '';
+                            $("#tableSection").css("display", "block");
+                            $("#fileForm").css("display", "none")
+                            if (extension == ".json") {
+                                result.forEach((element, index) => {
+                                    data += `<tr>
+                                <td>${index + 1}</td>
+                                <td>${element.ReferenceNumber}</td>
+                                <td>${element.MerchantName}</td>
+                                <td>${element.TransDate}</td>
+                                <td>
+                                    <select name="type" value="${element.Type}">
+                                        <option value="">구분</option>
+                                        <option value="01.본부장 회의비">01.본부장 회의비</option>
+                                        <option value="02.대중교통비">02.대중교통비</option>
+                                        <option value="03.택시비">03.택시비</option>
+                                        <option value="04.주유비(자차)">04.주유비(자차)</option>
+                                        <option value="05.주차/통행료">05.주차/통행료</option>
+                                        <option value="06.통신비">06.통신비</option>
+                                        <option value="08.어학/체력단련">08.어학/체력단련</option>
+                                        <option value="09.야근식대">09.야근식대</option>
+                                        <option value="20.교통비(영업,임원)">20.교통비(영업,임원)</option>
+                                        <option value="21.접대비">21.접대비</option>
+                                        <option value="22.접대비(P)">22.접대비(P)</option>
+                                        <option value="23.등기우편/택배">23.등기우편/택배</option>
+                                        <option value="24.주차료(영업/팀장)">24.주차료(영업/팀장)</option>
+                                        <option value="25.주유비(팀장)">25.주유비(팀장)</option>
+                                        <option value="31.경상연구개발비">31.경상연구개발비</option>
+                                        <option value="32.기타수수료">32.기타수수료</option>
+                                        <option value="33.기타회의비">33.기타회의비</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" value="${element.Amount}" style="border:hidden; width:70px;" /></td>
+                                <td><textarea style="border:hidden; width:160px;"></textarea></td>
+                                </tr>`;
+                                });
+
+                                $("#transactionsList").append(data); 
+
+                                $('#transactionsList tr').each(function () {                                  
+                                    $(this).find("td").eq(4).find("select").val($(this).find("td").eq(4).find("select").attr("value")).prop("selected", true);
+
+                                });
+
+                                }
+                                else if (extension == ".xls" || extension == ".xlsx") {
+                                result.forEach((element, index) => {
+                                    if (index !== 0) {
+                                        data += `<tr>
+                                <td>${index}</td>
+                                <td>${element.ReferenceNumber}</td>
+                                <td>${element.MerchantName}</td>
+                                <td>${element.TransDate}</td>
+                                <td>
+                                    <select name="type">
+                                        <option value="">구분</option>
+                                        <option value="01.본부장 회의비">01.본부장 회의비</option>
+                                        <option value="02.대중교통비">02.대중교통비</option>
+                                        <option value="03.택시비">03.택시비</option>
+                                        <option value="04.주유비(자차)">04.주유비(자차)</option>
+                                        <option value="05.주차/통행료">05.주차/통행료</option>
+                                        <option value="06.통신비">06.통신비</option>
+                                        <option value="08.어학/체력단련">08.어학/체력단련</option>
+                                        <option value="09.야근식대">09.야근식대</option>
+                                        <option value="20.교통비(영업,임원)">20.교통비(영업,임원)</option>
+                                        <option value="21.접대비">21.접대비</option>
+                                        <option value="22.접대비(P)">22.접대비(P)</option>
+                                        <option value="23.등기우편/택배">23.등기우편/택배</option>
+                                        <option value="24.주차료(영업/팀장)">24.주차료(영업/팀장)</option>
+                                        <option value="25.주유비(팀장)">25.주유비(팀장)</option>
+                                        <option value="31.경상연구개발비">31.경상연구개발비</option>
+                                        <option value="32.기타수수료">32.기타수수료</option>
+                                        <option value="33.기타회의비">33.기타회의비</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" value="${element.Amount}" style="border:hidden; width:70px;" /></td>
+                                <td><textarea style="border:hidden; width:160px;"></textarea></td>
+                                </tr>`;
+                                    }
+                                });
+                                $("#transactionsList").append(data);
+                              
+                                }
+                            },
+                            error: function (request, status, error) {
+                                console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                            }
+                        });
+                    }
+                    else {
+                        swal({
+                            title: "올바른 확장자의 파일을 선택해주세요.",
+                            //text: "Check ID and PW again.",
+                            icon: "warning",
+                        }).then((result) => {
+                            return;
+                        });
+                    }
+                }
+
+                $("#saveBtn").click(() => {
+                    let data = new Array();
+                    let typeChk = true;
+                    $('#transactionsList tr').each(function () {
+                        let rowData = new Object();
+                        rowData.No = $(this).find("td").eq(0).text();
+                        rowData.ReferenceNumber = $(this).find("td").eq(1).text();
+                        rowData.MerchantName = $(this).find("td").eq(2).text();
+                        rowData.TransDate = $(this).find("td").eq(3).text();
+                        if ($(this).find("td").eq(4).find("select").val() !== "") {
+                            rowData.Type = $(this).find("td").eq(4).find("select").val();  //구분
+                        }
+                        else {
+                            typeChk = false;
+                            swal({
+                                title: "구분을 선택해주세요.",
+                                //text: "Check ID and PW again.",
+                                icon: "warning",
+                            });
+                        }
+                        rowData.Amount = $(this).find("td").eq(5).find("input").val().toString();
+                        rowData.Content = $(this).find("td").eq(6).find("textarea").val();
+                        data.push(rowData);
+
+                    });
+                    if (typeChk == false) {
+                        return;
+                    } else {
+                        /* 클라이언트 로컬에 json파일 다운받기*/
+                        /*
+                        let data_s = JSON.stringify(data, null, "\t");
+                        let date = new Date();
+                        var dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(data_s);
+
+                        var link = document.createElement("a");
+                        document.body.appendChild(link);
+                        link.style = "display: none";
+                        link.href = dataUri;
+                        link.download = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()}:${date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()}:${date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds()}.json`;
+
+                        link.click();
+                        link.remove();
+                        */
+
+                        /* 서버에 json 파일 저장하기 */
+                        $.ajax({
+                            url: '/List/SaveAsJson',
+                            type: "POST",
+                            contentType: "application/json", //json 데이터 보낼 때는 지정 
+                            processData: false, // Not to process data
+                            data: JSON.stringify(data),
+                            datatype: "json",
+                            success: function (result) {
+                                if (result == "OK") {
+                                    swal({
+                                        title: "파일을 저장하였습니다.",
+                                        //text: "Check ID and PW again.",
+                                        icon: "success",
+                                    }).then((result) => {
+                                        window.location.href = "/List/JsonList";
+                                    });
+                                }
+                                else {
+                                    swal({
+                                        title: "파일을 저장하지 못했습니다.",
+                                        //text: "Check ID and PW again.",
+                                        icon: "warning",
+                                    });
+                                }
+                            },
+                            error: function (request, status, error) {
+                                console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                            }
+                        });
+
+
+
+
+                    }
+
+
+                   
+                })
+            })
+
+    </script>
+}
