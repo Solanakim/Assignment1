@@ -8,12 +8,14 @@ using ExcelDataReader;
 using System.IO;
 using System.Data;
 using Newtonsoft.Json;
+using System.Data.Entity;
 
 
 namespace HomePage.Controllers
 {
     public class ListController : Controller
     {
+        HomePageEntities db = new HomePageEntities();
         // GET: List
         [HttpGet]
         public ActionResult Transactions()
@@ -24,6 +26,8 @@ namespace HomePage.Controllers
         [HttpPost]      
         public JsonResult GetFileContent(string extension)
         {
+            Transactions transactions = new Transactions();
+            List<Options> options = db.Options.OrderBy(o => o.Value).ToList();
             if (Request.Files.Count > 0)
             {
                 List<Statement> statements = new List<Statement>();
@@ -42,15 +46,12 @@ namespace HomePage.Controllers
                     file.SaveAs(path);
 
                     if(extension == ".json")
-                    {
-                        
+                    {                        
                         string filePath = path;
                         using (StreamReader sr = new StreamReader(filePath))
                         {
                             statements = JsonConvert.DeserializeObject<List<Statement>>(sr.ReadToEnd());
-                        }
-                        Console.WriteLine("{0}",Json(statements));
-                        return Json(statements, JsonRequestBehavior.AllowGet);
+                        }                     
                       
                     }
                     else if(extension == ".xls" || extension == ".xlsx")
@@ -76,11 +77,13 @@ namespace HomePage.Controllers
                                     });
                                 }
                             }
-                        }
-
-                        return Json(statements, JsonRequestBehavior.AllowGet);
+                        }                      
                     }
-                    
+                    transactions.options = options;
+                    transactions.statements = statements;
+
+                    return Json(transactions, JsonRequestBehavior.AllowGet);
+
                 }
                 catch (Exception e)
                 {
@@ -88,6 +91,14 @@ namespace HomePage.Controllers
                 }
             }
             return Json("FAIL", JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetOptions()
+        {
+            Options options = db.Options.Where(c => c.Enabled == 1).FirstOrDefault();
+
+            return Json(options, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -114,7 +125,7 @@ namespace HomePage.Controllers
         {
             List<JsonFile> jsonFiles = new List<JsonFile>();
 
-            string[] files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/"), "*.JSON");
+            var files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);         
 
             foreach (string s in files)
             {
@@ -128,7 +139,8 @@ namespace HomePage.Controllers
                     {
                         FilePath = fi.FullName,
                         FileName = fi.Name,
-                        FileSize = fi.Length.ToString(),                       
+                        FileSize = fi.Length.ToString(),   
+                        
                     });
                     
                 }

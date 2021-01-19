@@ -31,5 +31,6 @@ namespace HomePage.Models
         public DbSet<ArticleCategories> ArticleCategories { get; set; }
         public DbSet<ArticleComments> ArticleComments { get; set; }
         public DbSet<Articles> Articles { get; set; }
+        public DbSet<Options> Options { get; set; }
     }
 }

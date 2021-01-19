@@ -87,13 +87,13 @@
         </div>
     </div>
     <div class="col-lg-9 mb-4">
-       
+
         <form id="fileForm">
             <div id="fileBox" class="filebox bs3-primary">
                 <input class="upload-name" value="파일을 선택해주세요.(xls,xlsx,json)" disabled="disabled" style="width:350px;">
 
                 <label for="file">UPLOAD</label>
-                <input type="file" id="file" name="file" class="upload-hidden">
+                <input type="file" id="file" name="file" accept=".xls, .xlsx, .json" class="upload-hidden">
 
             </div>
         </form>
@@ -113,12 +113,6 @@
                 </thead>
                 <tbody id="transactionsList">
                 </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="7" style="text-align:center;">
-                        </td>
-                    </tr>
-                </tfoot>
             </table>
             <button type="button" class="btn btn-primary" id="saveBtn">변경 저장</button>
         </div>
@@ -128,7 +122,7 @@
 @section Scripts{
     <script>
         $(document).ready(function () {
-           
+
 
             var fileTarget = $('.filebox .upload-hidden');
 
@@ -145,7 +139,7 @@
             });
 
 
-
+            //파일 서버로 보내기.
             function getFileContent(fileName) {
                 const extension = getExtensionOfFilename(fileName);
                 if (extension == ".json" || extension == ".xls" || extension == ".xlsx") {
@@ -166,190 +160,180 @@
                         data: fileData,
                         datatype: "json",
                         success: function (result) {
-                            let data = '';
                             $("#tableSection").css("display", "block");
                             $("#fileForm").css("display", "none")
-                            if (extension == ".json") {
-                                result.forEach((element, index) => {
-                                    data += `<tr>
-                                <td>${index + 1}</td>
-                                <td>${element.ReferenceNumber}</td>
-                                <td>${element.MerchantName}</td>
-                                <td>${element.TransDate}</td>
-                                <td>
-                                    <select name="type" value="${element.Type}">
-                                        <option value="">구분</option>
-                                        <option value="01.본부장 회의비">01.본부장 회의비</option>
-                                        <option value="02.대중교통비">02.대중교통비</option>
-                                        <option value="03.택시비">03.택시비</option>
-                                        <option value="04.주유비(자차)">04.주유비(자차)</option>
-                                        <option value="05.주차/통행료">05.주차/통행료</option>
-                                        <option value="06.통신비">06.통신비</option>
-                                        <option value="08.어학/체력단련">08.어학/체력단련</option>
-                                        <option value="09.야근식대">09.야근식대</option>
-                                        <option value="20.교통비(영업,임원)">20.교통비(영업,임원)</option>
-                                        <option value="21.접대비">21.접대비</option>
-                                        <option value="22.접대비(P)">22.접대비(P)</option>
-                                        <option value="23.등기우편/택배">23.등기우편/택배</option>
-                                        <option value="24.주차료(영업/팀장)">24.주차료(영업/팀장)</option>
-                                        <option value="25.주유비(팀장)">25.주유비(팀장)</option>
-                                        <option value="31.경상연구개발비">31.경상연구개발비</option>
-                                        <option value="32.기타수수료">32.기타수수료</option>
-                                        <option value="33.기타회의비">33.기타회의비</option>
-                                    </select>
-                                </td>
-                                <td><input type="text" value="${element.Amount}" style="border:hidden; width:70px;" /></td>
-                                <td><textarea style="border:hidden; width:160px;"></textarea></td>
-                                </tr>`;
-                                });
 
-                                $("#transactionsList").append(data); 
+                            FillTable(result, extension);
 
-                                $('#transactionsList tr').each(function () {                                  
-                                    $(this).find("td").eq(4).find("select").val($(this).find("td").eq(4).find("select").attr("value")).prop("selected", true);
+                        },
+                        error: function (request, status, error) {
+                            console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                        }
+                    });
+                }
+                else {
+                    swal({
+                        title: "올바른 확장자의 파일을 선택해주세요.",
+                        //text: "Check ID and PW again.",
+                        icon: "warning",
+                    }).then((result) => {
+                        return;
+                    });
+                }
+            }
 
-                                });
+            //테이블 채우기
+            function FillTable(result, extension) {
+                console.log(result);
+                let statements = result.statements;
+                let options = result.options;
+                let tableData = '';
+                let optionsData = `<option value="">구분</option>`;
+                let count = 0;
+                options.forEach((element, index) => {
+                    optionsData += `<option value="${element.OptionName}">${element.OptionName}</option>`;
+                })
 
-                                }
-                                else if (extension == ".xls" || extension == ".xlsx") {
-                                result.forEach((element, index) => {
-                                    if (index !== 0) {
-                                        data += `<tr>
-                                <td>${index}</td>
-                                <td>${element.ReferenceNumber}</td>
-                                <td>${element.MerchantName}</td>
-                                <td>${element.TransDate}</td>
-                                <td>
-                                    <select name="type">
-                                        <option value="">구분</option>
-                                        <option value="01.본부장 회의비">01.본부장 회의비</option>
-                                        <option value="02.대중교통비">02.대중교통비</option>
-                                        <option value="03.택시비">03.택시비</option>
-                                        <option value="04.주유비(자차)">04.주유비(자차)</option>
-                                        <option value="05.주차/통행료">05.주차/통행료</option>
-                                        <option value="06.통신비">06.통신비</option>
-                                        <option value="08.어학/체력단련">08.어학/체력단련</option>
-                                        <option value="09.야근식대">09.야근식대</option>
-                                        <option value="20.교통비(영업,임원)">20.교통비(영업,임원)</option>
-                                        <option value="21.접대비">21.접대비</option>
-                                        <option value="22.접대비(P)">22.접대비(P)</option>
-                                        <option value="23.등기우편/택배">23.등기우편/택배</option>
-                                        <option value="24.주차료(영업/팀장)">24.주차료(영업/팀장)</option>
-                                        <option value="25.주유비(팀장)">25.주유비(팀장)</option>
-                                        <option value="31.경상연구개발비">31.경상연구개발비</option>
-                                        <option value="32.기타수수료">32.기타수수료</option>
-                                        <option value="33.기타회의비">33.기타회의비</option>
-                                    </select>
-                                </td>
-                                <td><input type="text" value="${element.Amount}" style="border:hidden; width:70px;" /></td>
-                                <td><textarea style="border:hidden; width:160px;"></textarea></td>
-                                </tr>`;
-                                    }
-                                });
-                                $("#transactionsList").append(data);
-                              
-                                }
-                            },
-                            error: function (request, status, error) {
-                                console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
-                            }
-                        });
+                for (let i = 0; i < statements.length; i++) {
+                    if ((extension == ".xls" || extension == ".xlsx") && i == 0) {
+                        continue;
                     }
-                    else {
-                        swal({
-                            title: "올바른 확장자의 파일을 선택해주세요.",
-                            //text: "Check ID and PW again.",
-                            icon: "warning",
-                        }).then((result) => {
-                            return;
-                        });
-                    }
+                    count++;
+                    tableData += `<tr>
+                                                    <td>${count}</td>
+                                                    <td>${statements[i].ReferenceNumber}</td>
+                                                    <td>${statements[i].MerchantName}</td>
+                                                    <td>${statements[i].TransDate}</td>
+                                                    <td>
+                                                        <select name="type" value="${statements[i].Type}">
+                                                         ${optionsData}
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" value="${statements[i].Amount}" style="border:hidden; width:70px;" /></td>
+                                                    <td><textarea style="border:hidden; width:160px;" value="${statements[i].Content}">${statements[i].Content}</textarea></td>
+                                                    </tr>`;
                 }
 
-                $("#saveBtn").click(() => {
-                    let data = new Array();
-                    let typeChk = true;
+                $("#transactionsList").append(tableData);
+
+                if (extension == ".json") {
                     $('#transactionsList tr').each(function () {
-                        let rowData = new Object();
-                        rowData.No = $(this).find("td").eq(0).text();
-                        rowData.ReferenceNumber = $(this).find("td").eq(1).text();
-                        rowData.MerchantName = $(this).find("td").eq(2).text();
-                        rowData.TransDate = $(this).find("td").eq(3).text();
-                        if ($(this).find("td").eq(4).find("select").val() !== "") {
-                            rowData.Type = $(this).find("td").eq(4).find("select").val();  //구분
+                        $(this).find("td").eq(4).find("select").val($(this).find("td").eq(4).find("select").attr("value")).prop("selected", true);
+
+                    });
+                }
+
+            }
+
+            /*테이블 데이터 가져오기*/
+            $("#saveBtn").click(() => {
+                let data = new Array();
+                let typeChk = true;
+                $('#transactionsList tr').each(function () {
+                    let rowData = new Object();
+                    rowData.No = $(this).find("td").eq(0).text();
+                    rowData.ReferenceNumber = $(this).find("td").eq(1).text();
+                    rowData.MerchantName = $(this).find("td").eq(2).text();
+                    rowData.TransDate = $(this).find("td").eq(3).text();
+                    if ($(this).find("td").eq(4).find("select").val() !== "") {
+                        rowData.Type = $(this).find("td").eq(4).find("select").val();  //구분
+                    }
+                    else {
+                        typeChk = false;
+                        swal({
+                            title: "구분을 선택해주세요.",
+                            //text: "Check ID and PW again.",
+                            icon: "warning",
+                        });
+                    }
+                    rowData.Amount = $(this).find("td").eq(5).find("input").val().toString();
+                    rowData.Content = $(this).find("td").eq(6).find("textarea").val();
+                    data.push(rowData);
+
+                });
+                if (typeChk == false) {
+                    return;
+                } else {
+                    SaveJsoninServer(data);
+                }
+            });         
+
+
+            /* 서버에 json 파일 저장하기 */
+            function SaveJsoninServer(data) {
+                $.ajax({
+                    url: '/List/SaveAsJson',
+                    type: "POST",
+                    contentType: "application/json", //json 데이터 보낼 때는 지정
+                    processData: false, // Not to process data
+                    data: JSON.stringify(data),
+                    datatype: "json",
+                    success: function (result) {
+                        if (result == "OK") {
+                            swal({
+                                title: "파일을 저장하였습니다.",
+                                //text: "Check ID and PW again.",
+                                icon: "success",
+                            }).then((result) => {
+                                window.location.href = "/List/JsonList";
+                            });
                         }
                         else {
-                            typeChk = false;
                             swal({
-                                title: "구분을 선택해주세요.",
+                                title: "파일을 저장하지 못했습니다.",
                                 //text: "Check ID and PW again.",
                                 icon: "warning",
                             });
                         }
-                        rowData.Amount = $(this).find("td").eq(5).find("input").val().toString();
-                        rowData.Content = $(this).find("td").eq(6).find("textarea").val();
-                        data.push(rowData);
-
-                    });
-                    if (typeChk == false) {
-                        return;
-                    } else {
-                        /* 클라이언트 로컬에 json파일 다운받기*/
-                        /*
-                        let data_s = JSON.stringify(data, null, "\t");
-                        let date = new Date();
-                        var dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(data_s);
-
-                        var link = document.createElement("a");
-                        document.body.appendChild(link);
-                        link.style = "display: none";
-                        link.href = dataUri;
-                        link.download = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()}:${date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()}:${date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds()}.json`;
-
-                        link.click();
-                        link.remove();
-                        */
-
-                        /* 서버에 json 파일 저장하기 */
-                        $.ajax({
-                            url: '/List/SaveAsJson',
-                            type: "POST",
-                            contentType: "application/json", //json 데이터 보낼 때는 지정 
-                            processData: false, // Not to process data
-                            data: JSON.stringify(data),
-                            datatype: "json",
-                            success: function (result) {
-                                if (result == "OK") {
-                                    swal({
-                                        title: "파일을 저장하였습니다.",
-                                        //text: "Check ID and PW again.",
-                                        icon: "success",
-                                    }).then((result) => {
-                                        window.location.href = "/List/JsonList";
-                                    });
-                                }
-                                else {
-                                    swal({
-                                        title: "파일을 저장하지 못했습니다.",
-                                        //text: "Check ID and PW again.",
-                                        icon: "warning",
-                                    });
-                                }
-                            },
-                            error: function (request, status, error) {
-                                console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
-                            }
-                        });
-
-
-
-
+                    },
+                    error: function (request, status, error) {
+                        console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
                     }
+                });
+            }
 
 
-                   
-                })
-            })
+            /* 클라이언트 로컬에 json파일 다운받기*/
+            function SaveJsoninLocal(data) {
+                let data_s = JSON.stringify(data, null, "\t");
+                let date = new Date();
+                var dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(data_s);
+
+                var link = document.createElement("a");
+                document.body.appendChild(link);
+                link.style = "display: none";
+                link.href = dataUri;
+                link.download = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()}:${date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()}:${date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds()}.json`;
+
+                link.click();
+                link.remove();
+            }
+        })
+
+
+        /*구분 옵션 가져오기.*/
+        function getOptions() {
+            $.ajax({
+                url: '/List/GetOptions',
+                type: "Get",
+                contentType: "application/json; charset=utf-8 ",
+                processData: false, // Not to process data
+                data: {},
+                datatype: "json",
+                success: function (result) {
+                    let data = `<option value="">구분</option>`;
+                    result.forEach((element, index) => {
+                        data += `<option value="${element.Value}">${element.OptionName}</option>`;
+                    })
+                    return data;
+
+                },
+                error: function (request, status, error) {
+                    console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                }
+            });
+
+        }
 
     </script>
 }

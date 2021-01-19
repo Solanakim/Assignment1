@@ -76,6 +76,14 @@
           <Property Name="Telephone" Type="varchar" MaxLength="20" />
           <Property Name="EntryDate" Type="datetime" />
         </EntityType>
+        <EntityType Name="Options">
+          <Key>
+            <PropertyRef Name="Value" />
+          </Key>
+          <Property Name="OptionName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Value" Type="int" Nullable="false" />
+          <Property Name="Enabled" Type="int" Nullable="false" />
+        </EntityType>
         <Association Name="FK_ArticleCategories_Articles">
           <End Role="Articles" Type="Self.Articles" Multiplicity="1" />
           <End Role="ArticleCategories" Type="Self.ArticleCategories" Multiplicity="*" />
@@ -142,6 +150,7 @@
           <EntitySet Name="Articles" EntityType="Self.Articles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categories" EntityType="Self.Categories" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Members" EntityType="Self.Members" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Options" EntityType="Self.Options" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ArticleCategories" EntityType="Self.ArticleCategories" store:Type="Tables" store:Schema="dbo">
             <DefiningQuery>SELECT 
 [ArticleCategories].[ArticleIDX] AS [ArticleIDX], 
@@ -201,6 +210,7 @@ FROM [dbo].[ArticleCategories] AS [ArticleCategories]</DefiningQuery>
             <End Role="Members" EntitySet="Members" />
             <End Role="Members1" EntitySet="Members" />
           </AssociationSet>
+          <EntitySet Name="Options" EntityType="HomePageModel.Options" />
         </EntityContainer>
         <EntityType Name="ArticleFiles">
           <Key>
@@ -341,6 +351,14 @@ FROM [dbo].[ArticleCategories] AS [ArticleCategories]</DefiningQuery>
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Options">
+          <Key>
+            <PropertyRef Name="Value" />
+          </Key>
+          <Property Name="OptionName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Value" Type="Int32" Nullable="false" />
+          <Property Name="Enabled" Type="Int32" Nullable="false" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -418,6 +436,15 @@ FROM [dbo].[ArticleCategories] AS [ArticleCategories]</DefiningQuery>
                 <ScalarProperty Name="ArticleType" ColumnName="ArticleType" />
                 <ScalarProperty Name="BoardIDX" ColumnName="BoardIDX" />
                 <ScalarProperty Name="ArticleIDX" ColumnName="ArticleIDX" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Options">
+            <EntityTypeMapping TypeName="HomePageModel.Options">
+              <MappingFragment StoreEntitySet="Options">
+                <ScalarProperty Name="Enabled" ColumnName="Enabled" />
+                <ScalarProperty Name="Value" ColumnName="Value" />
+                <ScalarProperty Name="OptionName" ColumnName="OptionName" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

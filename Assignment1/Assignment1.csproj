@@ -197,7 +197,11 @@
     <Compile Include="Models\Members.cs">
       <DependentUpon>HomePageModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Options.cs">
+      <DependentUpon>HomePageModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\Statement.cs" />
+    <Compile Include="Models\Transactions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

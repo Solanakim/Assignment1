@@ -1,0 +1,18 @@
+[
+  {
+    "TransDate": "2020.10.26 11:04:17",
+    "ReferenceNumber": "35869578  ",
+    "MerchantName": "㈜텐바이텐",
+    "Amount": "306500000",
+    "Content": "ㅂㅣ고111",
+    "Type": "01.본부장 회의비"
+  },
+  {
+    "TransDate": "2020.10.26 10:30:24",
+    "ReferenceNumber": "35511945  ",
+    "MerchantName": "네이버파이낸셜(주)",
+    "Amount": "3500000000",
+    "Content": "비고2222",
+    "Type": "01.본부장 회의비"
+  }
+]

@@ -16,6 +16,7 @@
         <AssociationConnector Association="HomePageModel.FK_ArticleFiles_Articles" />
         <AssociationConnector Association="HomePageModel.FK_ArticleCategories_Articles" />
         <AssociationConnector Association="HomePageModel.FK_Members_Members" />
+        <EntityTypeShape EntityType="HomePageModel.Options" Width="1.5" PointX="0.75" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
