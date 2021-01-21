@@ -13,5 +13,7 @@ namespace HomePage.Models
         public string Amount { get; set; } //이용금액
         public string Content { get; set; } //비고
         public string Type { get; set; } //구분
+
+        public string TypeValue { get; set; } //구분 value
     }
 }

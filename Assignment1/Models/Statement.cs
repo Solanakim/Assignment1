@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
 namespace HomePage.Models
 {
     public class Statement
@@ -21,7 +20,9 @@ namespace HomePage.Models
         public string PaymentDueDate { get; set; } //결제예정일 
         public string Content{ get; set; } //비고
         public string Type { get; set; } = ""; //구분
-   
-      
+
+        public string TypeValue { get; set; } = ""; //구분 value
     }
+
+    
 }

@@ -191,7 +191,7 @@
                 let optionsData = `<option value="">구분</option>`;
                 let count = 0;
                 options.forEach((element, index) => {
-                    optionsData += `<option value="${element.OptionName}">${element.OptionName}</option>`;
+                    optionsData += `<option value="${element.Value}">${element.OptionName}</option>`;
                 })
 
                 for (let i = 0; i < statements.length; i++) {
@@ -205,7 +205,7 @@
                                                     <td>${statements[i].MerchantName}</td>
                                                     <td>${statements[i].TransDate}</td>
                                                     <td>
-                                                        <select name="type" value="${statements[i].Type}">
+                                                        <select name="type" value="${statements[i].TypeValue}">
                                                          ${optionsData}
                                                         </select>
                                                     </td>
@@ -216,10 +216,9 @@
 
                 $("#transactionsList").append(tableData);
 
-                if (extension == ".json") {
+                if (extension == ".json") {                
                     $('#transactionsList tr').each(function () {
                         $(this).find("td").eq(4).find("select").val($(this).find("td").eq(4).find("select").attr("value")).prop("selected", true);
-
                     });
                 }
 
@@ -236,7 +235,8 @@
                     rowData.MerchantName = $(this).find("td").eq(2).text();
                     rowData.TransDate = $(this).find("td").eq(3).text();
                     if ($(this).find("td").eq(4).find("select").val() !== "") {
-                        rowData.Type = $(this).find("td").eq(4).find("select").val();  //구분
+                        rowData.TypeValue = $(this).find("td").eq(4).find("select").val(); //구분 value값 
+                        rowData.Type = $(this).find("td").eq(4).find("select").find("option:selected").text();  //구분
                     }
                     else {
                         typeChk = false;
@@ -321,12 +321,7 @@
                 data: {},
                 datatype: "json",
                 success: function (result) {
-                    let data = `<option value="">구분</option>`;
-                    result.forEach((element, index) => {
-                        data += `<option value="${element.Value}">${element.OptionName}</option>`;
-                    })
                     return data;
-
                 },
                 error: function (request, status, error) {
                     console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);

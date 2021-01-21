@@ -37,6 +37,7 @@ namespace HomePage.Controllers
 
                     HttpPostedFileBase file = files[0];
                     string fileName = file.FileName;
+                    string extensions = Path.GetExtension(file.FileName);
 
                     // create the uploads folder if it doesn't exist
                     Directory.CreateDirectory(Server.MapPath("~/uploads/"));
@@ -45,16 +46,15 @@ namespace HomePage.Controllers
                     // save the file
                     file.SaveAs(path);
 
-                    if(extension == ".json")
-                    {                        
+                    if (extension == ".json")
+                    {
                         string filePath = path;
                         using (StreamReader sr = new StreamReader(filePath))
                         {
                             statements = JsonConvert.DeserializeObject<List<Statement>>(sr.ReadToEnd());
-                        }                     
-                      
+                        }
                     }
-                    else if(extension == ".xls" || extension == ".xlsx")
+                    else if (extension == ".xls" || extension == ".xlsx")
                     {
                         string filePath = path;
                         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -74,10 +74,11 @@ namespace HomePage.Controllers
                                         Amount = reader.GetValue(6).ToString(),
                                         Content = "",
                                         Type = "",
+                                        TypeValue = "",
                                     });
                                 }
                             }
-                        }                      
+                        }
                     }
                     transactions.options = options;
                     transactions.statements = statements;
@@ -140,7 +141,6 @@ namespace HomePage.Controllers
                         FilePath = fi.FullName,
                         FileName = fi.Name,
                         FileSize = fi.Length.ToString(),   
-                        
                     });
                     
                 }
@@ -150,12 +150,9 @@ namespace HomePage.Controllers
                     // sufficient for this demonstration.
                     // Your application may require different behavior.
                     Console.WriteLine(e.Message);
-                    continue;
                 }
-                Console.WriteLine("{0} : {1}", fi.Name, fi.Directory);
+                    Console.WriteLine("{0} : {1}", fi.Name, fi.Directory);
             }
-
-
             return View(jsonFiles);
         }
 

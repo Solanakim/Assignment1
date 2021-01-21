@@ -48,7 +48,7 @@ namespace HomePage.Controllers
 
                     if(attachFile !=null && attachFile.ContentLength > 0)
                     {
-                        var fileName = Path.GetFileName(attachFile.FileName);
+                        var fileName = Path.GetFileName(attachFile.FileName);                      
                         var path = Path.Combine(Server.MapPath("~/Upload/"), fileName);
                         attachFile.SaveAs(path);
 
@@ -194,7 +194,8 @@ namespace HomePage.Controllers
         {
             Articles article = db.Articles.Find(articleid);
             ArticleFiles files = db.ArticleFiles.Find(articleid);
-            
+
+            db.ArticleFiles.Remove(files);
             db.Articles.Remove(article);
             db.SaveChanges();
             return Json("OK", JsonRequestBehavior.AllowGet);
