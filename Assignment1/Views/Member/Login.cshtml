@@ -21,7 +21,7 @@
     <div class="col-lg-8 mb-4">
         @*<h3>Send us a Feedback</h3>*@
         @*<form name="sentMessage" id="contactForm" novalidate>*@
-        <form method="post" action="@Url.Action("Login", "Member")" name="sentMessage" id="contactForm" novalidate>
+        <form method="post" @*action="@Url.Action("Login", "Member")"*@ name="sentMessage" id="contactForm" novalidate>
             <div class="control-group form-group">
                 <div class="controls">
                     <label>ID</label>
@@ -43,7 +43,7 @@
             </div>
             <div id="success"></div>
             <!-- For success/fail messages -->
-            <button type="submit" class="btn btn-primary" id="submitBtn">Sign In</button>
+            <button type="button" class="btn btn-primary" id="submitBtn">Sign In</button>
         </form>
     </div>
 </div>
@@ -51,43 +51,43 @@
 @section Scripts{
     <script>
         $(document).ready(function () {
-            var result = '@ViewBag.Result';       //처음 페이지를 로드 할 때는  result 내용이 없어서 그냥 페이지 뜸.
-            let loginDate = "@ViewBag.LoginDate";
-            let savedId = getCookie("userInputId");
+           // var result = '@ViewBag.Result';       //처음 페이지를 로드 할 때는  result 내용이 없어서 그냥 페이지 뜸.
+            //let loginDate = "@ViewBag.LoginDate";
+            let savedId = getCookie("Cookie_id");
 
 
-            //if (savedId !== '' && savedId !== null) {
-            //    $("#loginId").val(savedId);
-            //    $("input:checkbox[id='idSaveChk']").prop("checked", true);
-            //    console.log(savedId)
-            //}
-          
-            $("#loginId").val(savedId);  //쿠키에 저장 된 값 가져오기
-
-            if ($("#loginId").val() != "") { // 그 전에 ID를 저장해서 처음 페이지 로딩
-                // 아이디 저장하기 체크되어있을 시,
-                $("#idSaveChk").attr("checked", true); // ID 저장하기를 체크 상태로 두기.
+            if (savedId !== '' && savedId !== null) {
+                $("#loginId").val(savedId);
+                $("input:checkbox[id='idSaveChk']").prop("checked", true);
+                console.log(savedId)
             }
+          
+            //$("#loginId").val(savedId);  //쿠키에 저장 된 값 가져오기
 
-            $("#idSaveChk").change(function () { // 체크박스에 변화가 발생시
-                if ($("#idSaveChk").is(":checked")) { // ID 저장하기 체크했을 때,
-                    var userInputId = $("#loginId").val();
-                    setCookie("userInputId", userInputId, 7); // 7일 동안 쿠키 보관
-                } else { // ID 저장하기 체크 해제 시,
-                    setCookie("userInputId","",0);
-                }
-            });
+            //if ($("#loginId").val() != "") { // 그 전에 ID를 저장해서 처음 페이지 로딩
+            //    // 아이디 저장하기 체크되어있을 시,
+            //    $("#idSaveChk").attr("checked", true); // ID 저장하기를 체크 상태로 두기.
+            //}
 
-            // ID 저장하기를 체크한 상태에서 ID를 입력하는 경우, 이럴 때도 쿠키 저장.
-            $("input[name='loginId']").keyup(function () { // ID 입력 칸에 ID를 입력할 때,
-                if ($("#idSaveChk").is(":checked")) { // ID 저장하기를 체크한 상태라면,
-                    var userInputId = $("#loginId").val();
-                    setCookie("userInputId", userInputId, 7); // 7일 동안 쿠키 보관
-                }
-            });
+            //$("#idSaveChk").change(function () { // 체크박스에 변화가 발생시
+            //    if ($("#idSaveChk").is(":checked")) { // ID 저장하기 체크했을 때,
+            //        var userInputId = $("#loginId").val();
+            //        setCookie("userInputId", userInputId, 7); // 7일 동안 쿠키 보관
+            //    } else { // ID 저장하기 체크 해제 시,
+            //        setCookie("userInputId","",0);
+            //    }
+            //});
+
+            //// ID 저장하기를 체크한 상태에서 ID를 입력하는 경우, 이럴 때도 쿠키 저장.
+            //$("input[name='loginId']").keyup(function () { // ID 입력 칸에 ID를 입력할 때,
+            //    if ($("#idSaveChk").is(":checked")) { // ID 저장하기를 체크한 상태라면,
+            //        var userInputId = $("#loginId").val();
+            //        setCookie("userInputId", userInputId, 7); // 7일 동안 쿠키 보관
+            //    }
+            //});
 
             //로그인
-        if (result == "OK" && loginDate !==null) {
+        @*if (result == "OK" && loginDate !==null) {
             swal({
                 title: "Succesfully Signed In!",
                 text: loginDate,
@@ -103,44 +103,54 @@
                 text: "Check ID and PW again.",
                 icon: "warning",
             });
-        }
+        }*@
 
-        //    $("#submitBtn").click(() => {
-        //        let formData = new FormData(document.getElementById('contactForm'));
+            $("#submitBtn").click(() => {
+                let formData = new FormData(document.getElementById('contactForm'));
 
-        //        $.ajax({
-        //            type: "POST",
-        //            enctype: 'multipart/form-data',
-        //            processData: false,
-        //            contentType: false,
-        //            url: '/Member/Login',
-        //            data: formData,
-        //            dataType: "xml",
-        //            done: function (response) {
-        //                swal({
-        //                    title: "Succesfully Signed In!",
-        //                    text: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()}:${date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()}:${date.getSeconds() < 9 ? `0${date.getSeconds()}` : date.getSeconds()}.json`,
-        //                    icon: "success",
-        //                }).then((value) => {
-        //                    if (document.getElementById("idSaveChk").checked == true) {
-        //                        setCookie("Cookie_id", response.MemberID, "15");
-        //                    }
-        //                    else {
-        //                        deleteCookie("Cookie_id");
-        //                    }
-        //                    sessionStorage.setItem("Id", response.MemberID);
-        //                    window.location.href = "/List/Transactions";
-        //                });
-        //            }, error: function (e) {
-        //                console.log(e);
-        //                swal({
-        //                    title: "Sign In Failed",
-        //                    text: "Check ID and PW again.",
-        //                    icon: "warning",
-        //                });
-        //            }
-        //        });
-        //    });
+                $.ajax({
+                    type: "POST",
+                    //enctype: 'multipart/form-data',
+                    processData: false,
+                    contentType: false,
+                    url: '/Member/SignIn',
+                    data: formData,
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.Result == "OK") {
+                            swal({
+                                title: "Succesfully Signed In!",
+                                text: response.loginDate,
+                                icon: "success",
+                            }).then((value) => {
+                                if (document.getElementById("idSaveChk").checked == true) {
+                                    setCookie("Cookie_id", response.Id, 15);
+                                }
+                                else {
+                                    setCookie("Cookie_id", "", 0);
+                                }
+                                sessionStorage.setItem("Id", response.MemberID);
+                                window.location.href = "/List/Transactions";
+                            });
+                        }
+                        else {
+                            swal({
+                                title: "Sign In Failed",
+                                text: "Check ID and PW again.",
+                                icon: "warning",
+                            });
+                        }
+                    }, error: function (request, status, error) {
+                        console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                    
+                        swal({
+                            title: "Sign In Failed",
+                            //text: "Check ID and PW again.",
+                            icon: "warning",
+                        });
+                    }
+                });
+            });
         })
 
     </script>

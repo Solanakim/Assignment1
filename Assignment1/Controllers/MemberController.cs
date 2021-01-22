@@ -129,34 +129,66 @@ namespace HomePage.Controllers
             return View(member);
    
         }
+        //[HttpPost]
+        //public JsonResult Login(Members member)
+        //{
+        //    Members dbMember = db.Members.Find(member.MemberID);
+        //    Login login = new Login();
+
+        //    if (dbMember != null && dbMember.MemberPWD == member.MemberPWD)
+        //    {
+        //        try
+        //        {
+        //            login.Result = "OK";
+        //            login.Id = member.MemberID;
+        //            login.LoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            login.Result = "FAIL";
+
+        //        }
+
+        //    }
+        //    else
+        //    {
+        //        login.Result = "FAIL";
+
+        //    }
+
+        //    return Json(login, JsonRequestBehavior.AllowGet);
+        //}
+
         [HttpPost]
-        public ActionResult Login(Members member)
+        public JsonResult SignIn(Members member)
         {
             Members dbMember = db.Members.Find(member.MemberID);
+            Login login = new Login();
 
             if (dbMember != null && dbMember.MemberPWD == member.MemberPWD)
             {
                 try
                 {
-                    ViewBag.Result = "OK";
-                    ViewBag.ID = member.MemberID;
-                    ViewBag.LoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    login.Result = "OK";
+                    login.Id = member.MemberID;
+                    login.LoginDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
                 }
                 catch (Exception ex)
                 {
-                    ViewBag.Result = "FAIL";
+                    login.Result = "FAIL";
 
                 }
 
             }
             else
             {
-                ViewBag.Result = "FAIL";
+                login.Result = "FAIL";
 
             }
 
-            return View(dbMember);
+            return Json(login, JsonRequestBehavior.AllowGet);
         }
 
 

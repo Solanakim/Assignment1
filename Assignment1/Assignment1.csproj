@@ -153,6 +153,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\ApiBoardController.cs" />
     <Compile Include="Controllers\BoardController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ListController.cs" />
@@ -194,6 +195,7 @@
     </Compile>
     <Compile Include="Models\Json.cs" />
     <Compile Include="Models\JsonFile.cs" />
+    <Compile Include="Models\Login.cs" />
     <Compile Include="Models\Members.cs">
       <DependentUpon>HomePageModel.tt</DependentUpon>
     </Compile>

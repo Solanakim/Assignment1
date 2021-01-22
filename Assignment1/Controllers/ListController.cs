@@ -126,7 +126,7 @@ namespace HomePage.Controllers
         {
             List<JsonFile> jsonFiles = new List<JsonFile>();
 
-            var files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);         
+            IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);         
 
             foreach (string s in files)
             {
