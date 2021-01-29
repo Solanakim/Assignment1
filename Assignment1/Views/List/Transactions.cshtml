@@ -118,7 +118,7 @@
     </div>
 </div>
 
-@section Scripts{
+@section Scripts{   
     <script>
         $(document).ready(function () {
             var fileTarget = $('.filebox .upload-hidden');
@@ -159,7 +159,7 @@
                         success: function (result) {
                             $("#tableSection").css("display", "block");
                             $("#fileForm").css("display", "none")
-
+                         
                             FillTable(result, extension);
 
                         },
@@ -180,8 +180,7 @@
             }
 
             //테이블 채우기
-            function FillTable(result, extension) {
-                console.log(result);
+            function FillTable(result, extension) {               
                 let statements = result.statements;
                 let options = result.options;
                 let tableData = '';
@@ -228,7 +227,7 @@
                 $('#transactionsList tr').each(function () {
                     let rowData = new Object();
                     rowData.No = $(this).find("td").eq(0).text();
-                    rowData.ReferenceNumber = $(this).find("td").eq(1).text();
+                    rowData.ReferenceNumber = $(this).find("td").eq(1).text().trim();
                     rowData.MerchantName = $(this).find("td").eq(2).text();
                     rowData.TransDate = $(this).find("td").eq(3).text();
                     if ($(this).find("td").eq(4).find("select").val() !== "") {
@@ -253,8 +252,7 @@
                 } else {
                     SaveJsoninServer(data);
                 }
-            });         
-
+            });      
 
             /* 서버에 json 파일 저장하기 */
             function SaveJsoninServer(data) {
@@ -263,7 +261,7 @@
                     type: "POST",
                     contentType: "application/json", //json 데이터 보낼 때는 지정
                     processData: false, // Not to process data
-                    data: JSON.stringify(data),
+                    data: JSON.stringify({ "statement": data, "saveType" : 1, "fileName" : "" }),
                     datatype: "json",
                     success: function (result) {
                         if (result == "OK") {
@@ -288,6 +286,39 @@
                     }
                 });
             }
+
+            /* 서버에 json 파일 저장하기 */
+            //function SaveJsoninServer(data) {
+            //    $.ajax({
+            //        url: '/List/SaveAsJson',
+            //        type: "POST",
+            //        contentType: "application/json", //json 데이터 보낼 때는 지정
+            //        processData: false, // Not to process data
+            //        data: JSON.stringify(data),
+            //        datatype: "json",
+            //        success: function (result) {
+            //            if (result == "OK") {
+            //                swal({
+            //                    title: "파일을 저장하였습니다.",
+            //                    //text: "Check ID and PW again.",
+            //                    icon: "success",
+            //                }).then((result) => {
+            //                    window.location.href = "/List/JsonList";
+            //                });
+            //            }
+            //            else {
+            //                swal({
+            //                    title: "파일을 저장하지 못했습니다.",
+            //                    //text: "Check ID and PW again.",
+            //                    icon: "warning",
+            //                });
+            //            }
+            //        },
+            //        error: function (request, status, error) {
+            //            console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+            //        }
+            //    });
+            //}
 
 
             /* 클라이언트 로컬에 json파일 다운받기*/

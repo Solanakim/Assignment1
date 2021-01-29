@@ -251,6 +251,9 @@
     <Content Include="Template\blog-home-1.html" />
     <Content Include="Template\blog-home-2.html" />
     <Content Include="Template\blog-post.html" />
+    <Content Include="Template\Client-side-HTML-Table-Pagination-Plugin-with-jQuery-Paging\.gitignore" />
+    <Content Include="Template\Client-side-HTML-Table-Pagination-Plugin-with-jQuery-Paging\index.html" />
+    <Content Include="Template\Client-side-HTML-Table-Pagination-Plugin-with-jQuery-Paging\paging.js" />
     <Content Include="Template\contact.html" />
     <Content Include="Template\css\modern-business.css" />
     <Content Include="Template\faq.html" />
@@ -272,6 +275,12 @@
     <Content Include="Template\pricing.html" />
     <Content Include="Template\services.html" />
     <Content Include="Template\sidebar.html" />
+    <Content Include="Template\Tiny-jQuery-Pagination-Widget-For-HTML-Table-table-hpaging\.gitattributes" />
+    <Content Include="Template\Tiny-jQuery-Pagination-Widget-For-HTML-Table-table-hpaging\.gitignore" />
+    <Content Include="Template\Tiny-jQuery-Pagination-Widget-For-HTML-Table-table-hpaging\index.html" />
+    <Content Include="Template\Tiny-jQuery-Pagination-Widget-For-HTML-Table-table-hpaging\paging.css" />
+    <Content Include="Template\Tiny-jQuery-Pagination-Widget-For-HTML-Table-table-hpaging\scripts\jquery.table.hpaging.js" />
+    <Content Include="Template\Tiny-jQuery-Pagination-Widget-For-HTML-Table-table-hpaging\scripts\jquery.table.hpaging.min.js" />
     <Content Include="Template\vendor\bootstrap\css\bootstrap-grid.css" />
     <Content Include="Template\vendor\bootstrap\css\bootstrap-grid.min.css" />
     <Content Include="Template\vendor\bootstrap\css\bootstrap-reboot.css" />
@@ -336,6 +345,8 @@
     <Content Include="Views\List\Transactions.cshtml" />
     <Content Include="Views\List\JsonList.cshtml" />
     <Content Include="Views\List\Json.cshtml" />
+    <Content Include="Template\Client-side-HTML-Table-Pagination-Plugin-with-jQuery-Paging\LICENSE" />
+    <Content Include="Template\Client-side-HTML-Table-Pagination-Plugin-with-jQuery-Paging\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

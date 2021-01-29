@@ -11,7 +11,7 @@ namespace HomePage
             //제이쿼리 파일 추가
             bundles.Add(new ScriptBundle("~/Home/jquery").Include(
                  "~/Template/vendor/jquery/jquery.min.js",
-                  "~/Template/footable-bootstrap.latest/js/footable.js",
+                  "~/Template/Client-side-HTML-Table-Pagination-Plugin-with-jQuery-Paging/paging.js",
                    "~/Content/general.js"
                        //"~/Template/vendor/jquery/jquery.min.map",
                        //"~/Template/vendor/jquery/jquery.js",                      
@@ -50,7 +50,9 @@ namespace HomePage
                        "~/Template/footable-bootstrap.latest/css/footable.bootstrap.css",
                            "~/Template/vendor/bootstrap/css/bootstrap.min.css",
                              "~/Template/css/modern-business.css"
-                          
+                            
+
+
                            ));
         }
     }

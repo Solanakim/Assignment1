@@ -7,6 +7,27 @@
     Layout = "~/Views/Shared/_SideBarLayoutPage.cshtml";
 }
 
+<style>
+    .paging-nav {
+        text-align: right;
+        padding-top: 2px;
+    }
+
+        .paging-nav a {
+            margin: auto 1px;
+            text-decoration: none;
+            display: inline-block;
+            padding: 1px 7px;
+            background: #91b9e6;
+            color: white;
+            border-radius: 3px;
+        }
+
+        .paging-nav .selected-page {
+            background: #187ed5;
+            font-weight: bold;
+        }
+</style>
 
 <!-- Page Heading/Breadcrumbs -->
 <h1 class="mt-4 mb-3">Transactions</h1>
@@ -26,62 +47,97 @@
             <a href="/List/JsonList" class="list-group-item active">Json List</a>
         </div>
     </div>
-    <div class="col-lg-9 mb-4">        
-        <table class="table table-bordered" style="width:100%; ">
-            <thead>
-                <tr>
-                    <th width="20%">번호</th>
-                    <th width="50%">파일 제목</th>
-                    <th width="30%">파일 크기</th>
-                </tr>
-            </thead>
-            <tbody id="jsonList">
-                @{
-                    int i = 0;
-                    int idx = 0;
-                }
-                @foreach (var item in Model)
-                {
-
+    <div class="col-lg-9 mb-4">
+        <p>
+            월별 선택: <input type="month" id="date">
+            <table class="table table-bordered" style="width:100%; ">
+                <thead>
                     <tr>
-                        <td>@(i+1)</td>
-                        <td><a href="#" class="link" onclick="clickEvent(`@item.FileName`)">@item.FileName</a></td>
-                        <td>@item.FileSize</td>
+                        <th width="20%">번호</th>
+                        <th width="50%">파일 제목</th>
+                        <th width="30%">파일 크기</th>
                     </tr>
-                    i++;
-                }
-            </tbody>           
-        </table>
+                </thead>
+                <tbody id="jsonList">
+                    @{
+                        int i = 0;
+                        int idx = 0;
+                    }
+                    @foreach (var item in Model)
+                    {
+
+                        <tr>
+                            <td>@(i+1)</td>
+                            <td><a href="#" class="link" onclick="clickEvent(`@item.FileName`)">@item.FileName</a></td>
+                            <td>@item.FileSize</td>
+                        </tr>
+                        i++;
+                    }
+                </tbody>
+            </table>
+
     </div>
 </div>
 
 @section Scripts{
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script>
         function clickEvent(fileName) {
             //console.log("eventListener");
-            //let fileName = event.target.innerText;
-            window.open(`/List/Json?fileName=${fileName}`, `${fileName}` ,"width=800, height=700, toolbar=no, menubar=no, scrollbars=no, resizable=yes");
+            //let fileName = event.target.innerText;          
+            window.open(`/List/Json?fileName=${fileName}`, `${fileName}`, "width=800, height=700, toolbar=no, menubar=no, scrollbars=no, resizable=yes");
         }
 
 
-        //function init() {
-        //    var elements = document.getElementsByClassName("link");
-        //    Array.prototype.forEach.call(elements, function (item, index) {
-        //        item.addEventListener("click", clickEvent);
-        //    });
-        //    console.log(elements);
-        //}
+        function FillTable(result) {
+            let tableData = ``;
 
-        //init();
+            if (result == `` || result == null) {
+                tableData += `<tr><td colspan="3">No Data</td></tr>`;
+            }
+            else {
+                result.forEach((element, index) => {
+                    tableData += `<tr>
+                                    <td>${(index + 1)}</td>
+                                    <td><a href="#" class="link" onclick="clickEvent('${element.FileName}')">${element.FileName}</a></td>
+                                    <td>${element.FileSize}</td>
+                                </tr>`;
+                })
+            }
+            $("#jsonList").append(tableData);
+            $(".paging-nav").empty();
+            $('.table').paging({ limit: 10 });
+
+        }
 
 
         $(document).ready(function () {
-            $('.table').footable({
-                "paging": {
-                    "enabled": true,
-                    "position": "right"
-                }
-            });             
+            var date = $('#date');
+
+            date.on('change', function () {         //값이 변경되면
+                let date = new Date($('#date').val());
+                let day = date.getDate();
+                let month = date.getMonth() + 1;
+                let year = date.getFullYear();
+                $.ajax({
+                    url: '/List/GetJsonListByDate',
+                    type: "POST",
+                    contentType: "application/json", //json 데이터 보낼 때는 지정
+                    processData: false, // Not to process data
+                    data: JSON.stringify({ "year": year, "month": month }),
+                    datatype: "json",
+                    success: function (result) {
+                        $(`#jsonList`).empty();
+                        FillTable(result);
+                    },
+                    error: function (request, status, error) {
+                        console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                    }
+                });
+
+            })
+            $('.table').paging({ limit: 10 });
+
         })
 
     </script>

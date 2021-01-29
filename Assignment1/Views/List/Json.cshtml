@@ -8,6 +8,92 @@
     Layout = "~/Views/Shared/_SideBarLayoutPage.cshtml";
 }
 
+<style>
+    .where {
+        display: block;
+        margin: 25px 15px;
+        font-size: 11px;
+        color: #000;
+        text-decoration: none;
+        font-family: verdana;
+        font-style: italic;
+    }
+
+    .filebox input[type="file"] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        border: 0;
+    }
+
+    .filebox label {
+        display: inline-block;
+        padding: .5em .75em;
+        color: #999;
+        font-size: inherit;
+        line-height: normal;
+        vertical-align: middle;
+        background-color: #fdfdfd;
+        cursor: pointer;
+        border: 1px solid #ebebeb;
+        border-bottom-color: #e2e2e2;
+        border-radius: .25em;
+    }
+
+    /* named upload */
+    .filebox .upload-name {
+        display: inline-block;
+        padding: .5em .75em;
+        font-size: inherit;
+        font-family: inherit;
+        line-height: normal;
+        vertical-align: middle;
+        background-color: #f5f5f5;
+        border: 1px solid #ebebeb;
+        border-bottom-color: #e2e2e2;
+        border-radius: .25em;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        /*   appearance: none;*/
+    }
+
+    .filebox.bs3-primary label {
+        color: #fff;
+        background-color: #5cb85c;
+        border-color: #4cae4c;
+    }
+
+    #fileSave {
+        float: left;
+    }
+
+        #fileSave select {
+            height: 35px;
+            float: left;
+            margin-right: 10px;
+        }
+
+        #fileSave input {
+            height: 35px;
+            float: left;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+    #deleteBtn {
+        float: right;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .afterBrowse{
+        display:none;
+    }
+</style>
+
 <!-- Page Heading/Breadcrumbs -->
 <h1 class="mt-4 mb-3">Transactions</h1>
 
@@ -27,8 +113,17 @@
         </div>
     </div>
     <div class="col-lg-9 mb-4">
+        <form id="fileForm">
+            <div id="fileBox" class="filebox bs3-primary">
+                <input class="upload-name" value="추가할 파일을 선택해주세요.(xls,xlsx)" disabled="disabled" style="width:350px;">
+
+                <label for="file">UPLOAD</label>
+                <input type="file" id="file" name="file" accept=".xls, .xlsx" class="upload-hidden">
+
+            </div>
+        </form>
         <table class="table table-bordered" style="width:100%; ">
-            <thead>
+            <thead id="tableHead" class="tableElement">
                 <tr>
                     <th width="15%">번호</th>
                     <th width="15%">승인번호</th>
@@ -40,7 +135,7 @@
 
                 </tr>
             </thead>
-            <tbody id="transactionsList">
+            <tbody id="transactionsList" class="tableElement">
                 @{
                     int i = 0;
                     int idx = 0;
@@ -49,20 +144,307 @@
                 {
                     idx = i + 1;
 
-                        <tr>
-                            <td>@idx.ToString()</td>
-                            <td>@item.ReferenceNumber</td>
-                            <td>@item.MerchantName</td>
-                            <td>@item.TransDate</td>
-                            <td>@item.Type</td>
-                            <td>@item.Amount</td>
-                            <td>@item.Content</td>
-                        </tr>
-                  
+                    <tr>
+                        <td>@idx.ToString()</td>
+                        <td>@item.ReferenceNumber</td>
+                        <td>@item.MerchantName</td>
+                        <td>@item.TransDate</td>
+                        <td>@item.Type<input type="hidden" value="@item.TypeValue" id="@idx.ToString()" /></td>
+                        <td>@item.Amount</td>
+                        <td>@item.Content</td>
+                    </tr>
+
                     i++;
 
                 }
-            </tbody>          
-        </table>      
+            </tbody>
+        </table>
+        <div>
+            <div id="fileSave" class="afterBrowse" float:left;">
+
+                <select name="saveType" value="1">
+                    <option value="1">새로운 파일로 저장</option>
+                    <option value="2">현재 파일에 덮어쓰기</option>
+                </select>
+
+                <input type="text" id="fileName" placeholder="파일 이름(영문,한글,숫자)"  />
+
+                <button type="button" class="btn btn-primary" id="saveBtn">변경 저장</button>
+            </div>
+            <button type="button" class="btn btn-danger afterBrowse" id="deleteBtn">삭제</button>
+        </div>
     </div>
 </div>
+
+@section Scripts{
+    <script>
+        //테이블 데이터와 파일 데이터 머지.
+        function getFileContent(fileName) {
+            const extension = getExtensionOfFilename(fileName);
+            if (extension == ".xls" || extension == ".xlsx") {
+
+                let fileUpload = $("#file").get(0);
+                let files = fileUpload.files;
+
+                let fileData = new FormData();
+                let tableData = getTableData();
+                fileData.append(files[0].name, files[0]);
+                fileData.append("statements_json", JSON.stringify(tableData));
+
+                $.ajax({
+                    url: '/List/GetMergeData',
+                    type: "POST",
+                    contentType: false, // Not to set any content header(파일 보낼 때는 지정 안함)
+                    processData: false, // Not to process data
+                    data: fileData,
+                    datatype: "json",
+                    success: function (result) {
+                        $("#fileForm").css("display", "none")
+                        $(".afterBrowse").css("display", "block");
+                        $(".tableElement").empty();
+                     
+                        $("#tableHead").append(` <tr>
+                        <th width="5%"></th>
+                        <th width="5%">번호</th>
+                        <th width="15%">승인번호</th>
+                        <th width="20%">가맹점명</th>
+                        <th width="20%">이용일시</th>
+                        <th width="20%">구분</th>
+                        <th width="10%">이용금액</th>
+                        <th width="20%">비고</th>
+
+                    </tr>`);
+                        FillTable(result);
+
+                    },
+                    error: function (request, status, error) {
+                        console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                    }
+                });
+            }
+            else {
+                swal({
+                    title: "올바른 확장자의 파일을 선택해주세요.",
+                    //text: "Check ID and PW again.",
+                    icon: "warning",
+                }).then((result) => {
+                    return;
+                });
+            }
+        }
+        //테이블 데이터 가져오기
+        function getTableData() {
+            let data = new Array();
+            let typeChk = true;
+            $('#transactionsList tr').each(function () {
+                let rowData = new Object();
+                //rowData.No = $(this).find("td").eq(0).text();
+                rowData.ReferenceNumber = $(this).find("td").eq(1).text().trim();
+                rowData.MerchantName = $(this).find("td").eq(2).text();
+                rowData.TransDate = $(this).find("td").eq(3).text();
+                rowData.TypeValue = $(`#${$(this).find("td").eq(0).text()}`).val(); //구분 value값
+                rowData.Type = $(this).find("td").eq(4).text();  //구분
+                rowData.Amount = $(this).find("td").eq(5).text();
+                rowData.Content = $(this).find("td").eq(6).text();
+                data.push(rowData);
+
+            });
+            return data;
+        }
+
+        //테이블 채우기
+        function FillTable(result) {
+            CheckYearMonth(result);
+            let statements = result.statements;
+            let options = result.options;
+            let tableData = '';
+            let optionsData = `<option value="">구분</option>`;
+            let count = 0;
+            options.forEach((element, index) => {
+                optionsData += `<option value="${element.Value}">${element.OptionName}</option>`;
+            })
+
+            for (let i = 0; i < statements.length; i++) {
+                tableData += `<tr>                          <td><input type="checkbox" name="deleteCk"/></td>
+                                                            <td>${i + 1}</td>
+                                                            <td>${statements[i].ReferenceNumber}</td>
+                                                            <td>${statements[i].MerchantName}</td>
+                                                            <td>${statements[i].TransDate}</td>
+                                                            <td>
+                                                                <select name="type" value="${statements[i].TypeValue}">
+                                                                 ${optionsData}
+                                                                </select>
+                                                            </td>
+                                                            <td><input type="text" value="${statements[i].Amount}" style="border:hidden; width:70px;" /></td>
+                                                            <td><textarea style="border:hidden; width:160px;" value="${statements[i].Content}">${statements[i].Content}</textarea></td>
+                                                            </tr>`;
+            }
+
+            $("#transactionsList").append(tableData);
+            $('#transactionsList tr').each(function () {
+                $(this).find("td").eq(5).find("select").val($(this).find("td").eq(5).find("select").attr("value")).prop("selected", true);
+            });
+        }
+
+        function CheckYearMonth(result) {
+            const year = result.statements[0].TransDate;
+        }
+
+        function check(re, what) {
+            if (re.test(what)) {
+                return true;
+            }
+            return false;
+        }
+
+
+
+
+        $(document).ready(function () {
+            var fileTarget = $('.filebox .upload-hidden');
+            let filename;
+            fileTarget.on('change', function () {         //값이 변경되면
+                if (window.FileReader) {    //Modern Browser
+                     filename = $(this)[0].files[0].name;
+                } else {    //old IE
+                     filename = $(this).val().split('/').pop().split('\\').pop();   //파일명만 추출
+                }
+                getFileContent(filename);
+
+                $(this).siblings('.upload-name').val(filename); //추출한 파일 명 삽입
+            });
+
+            let saveType = $('select[name=saveType]');
+            saveType.on('change', function () {
+                if ($(this).val() === '2') {
+
+                    $('#fileName').css("display", "none");
+                }
+                else {
+                    $('#fileName').css("display", "block");
+                }
+            })
+
+            /*테이블 데이터 저장*/
+            $("#saveBtn").click(() => {
+                let fileNameInput = $(`#fileName`).val();
+                if (saveType.val() == 1 && fileNameInput == "") {
+                    swal({
+                        title: "파일 이름을 입력해주세요.",
+                        //text: "Check ID and PW again.",
+                        icon: "warning",
+                    }).then((result) => {
+                        return;
+                    });
+                }
+                else {
+                    let data = new Array();
+                    let typeChk = true;
+                    $('#transactionsList tr').each(function () {
+                        let rowData = new Object();
+                        rowData.No = $(this).find("td").eq(1).text();
+                        rowData.ReferenceNumber = $(this).find("td").eq(2).text().trim();
+                        rowData.MerchantName = $(this).find("td").eq(3).text();
+                        rowData.TransDate = $(this).find("td").eq(4).text();
+                        if ($(this).find("td").eq(5).find("select").val() !== "") {
+                            rowData.TypeValue = $(this).find("td").eq(5).find("select").val(); //구분 value값
+                            rowData.Type = $(this).find("td").eq(5).find("select").find("option:selected").text();  //구분
+                        }
+                        else {
+                            typeChk = false;
+                            swal({
+                                title: "구분을 선택해주세요.",
+                                //text: "Check ID and PW again.",
+                                icon: "warning",
+                            });
+                        }
+                        rowData.Amount = $(this).find("td").eq(6).find("input").val().toString();
+                        rowData.Content = $(this).find("td").eq(7).find("textarea").val();
+                        data.push(rowData);
+
+                    });
+                    if (typeChk == false) {
+                        return;
+                    } else {
+                        if ($(`select[name=saveType]`).val() == 1) {                          
+                            let reg = /^[가-힣0-9a-zA-Z]+$/; //한글,영문,숫자만 되는것 
+                            
+                            if (check(reg, $(`#fileName`).val())) {
+                                SaveJsoninServer(data, fileNameInput);  //새로운 파일이름 으로 저장
+                            }
+                            else {
+                                swal({
+                                    title: "파일이름이 유효하지 않습니다.",
+                                    //text: "Check ID and PW again.",
+                                    icon: "warning",
+                                });
+                            }
+                        }
+                        else 
+                            SaveJsoninServer(data,getParameterByName("fileName"));  //기존 파일 이름으로 저장
+                        
+                    }
+                }
+            });
+
+            /* 서버에 json 파일 저장하기 */
+            function SaveJsoninServer(data,fileName) {
+                let saveTypeValue = Number(saveType.val()) + 1; 
+                $.ajax({
+                    url: '/List/SaveAsJson',
+                    type: "POST",
+                    contentType: "application/json", //json 데이터 보낼 때는 지정
+                    processData: false, // Not to process data
+                    data: JSON.stringify({ "statement": data, "saveType": saveTypeValue, "fileName":fileName }),
+                    datatype: "json",
+                    success: function (result) {
+                        if (result == "OK") {
+                            swal({
+                                title: "파일을 저장하였습니다.",
+                                //text: "Check ID and PW again.",
+                                icon: "success",
+                            }).then((result) => {
+                                window.location.href = "/List/JsonList";
+                            });
+                        }
+                        else {
+                            swal({
+                                title: "파일을 저장하지 못했습니다.",
+                                //text: "Check ID and PW again.",
+                                icon: "warning",
+                            });
+                        }
+                    },
+                    error: function (request, status, error) {
+                        console.log("code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);
+                    }
+                });
+            }
+
+            /*테이블 행 삭제 */
+            $("#deleteBtn").click(() => {
+                if ($("input:checkbox[name=deleteCk]:checked").length < 1) {
+                    swal({
+                        title: "삭제할 행을 선택해주세요.",
+                        //text: "Check ID and PW again.",
+                        icon: "warning",
+                    }).then((result) => {
+                        return;
+                    });
+
+                } else {
+                    $('#transactionsList tr').each(function () {
+                        if ($(this).find("td").eq(0).find("input:checkbox").is(":checked") == true) {
+                            $(this).remove();
+                        }
+                    });
+                    $('#transactionsList tr').each(function (index) {
+                        $(this).find("td").eq(1).text(`${index+1}`);                       
+                    });
+                }
+            });
+        })
+
+
+    </script>
+}
