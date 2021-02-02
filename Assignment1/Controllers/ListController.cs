@@ -100,7 +100,7 @@ namespace HomePage.Controllers
         {
             JavaScriptSerializer js = new JavaScriptSerializer();
             Transactions transactions = new Transactions();       
-            List<Statement> Comparison = js.Deserialize<List<Statement>>(statements_json);
+            List<Statement> comparison = js.Deserialize<List<Statement>>(statements_json);
             List<Statement> statements = js.Deserialize<List<Statement>>(statements_json);
             List<Options> options = db.Options.Where(c => c.Enabled == 1).OrderBy(o => o.Value).ToList();
             bool check = false;
@@ -132,7 +132,7 @@ namespace HomePage.Controllers
                             while (reader.Read()) //Each row of the file
                             {
                                 string rfnumber = reader.GetValue(2).ToString().Trim();
-                                foreach (Statement statement in Comparison)
+                                foreach (Statement statement in comparison)
                                 {                                    
                                     if(statement.ReferenceNumber == rfnumber || rfnumber == "승인번호")
                                     {

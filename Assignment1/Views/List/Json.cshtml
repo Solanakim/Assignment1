@@ -78,15 +78,14 @@
         }
 
         #fileSave input {
+            width:210px;
             height: 35px;
-            float: left;
-            margin-left: 10px;
+            float: left;            
             margin-right: 10px;
         }
     #deleteBtn {
         float: right;
-        margin-left: 10px;
-        margin-right: 10px;
+        margin-left: 10px;       
     }
 
     .afterBrowse{
@@ -178,8 +177,8 @@
 
 @section Scripts{
     <script>
-        //테이블 데이터와 파일 데이터 머지.
-        function getFileContent(fileName) {
+        /*테이블 데이터와 파일 데이터 머지*/
+        function GetFileContent(fileName) {
             const extension = getExtensionOfFilename(fileName);
             if (extension == ".xls" || extension == ".xlsx") {
 
@@ -187,7 +186,7 @@
                 let files = fileUpload.files;
 
                 let fileData = new FormData();
-                let tableData = getTableData();
+                let tableData =GetTableData();
                 fileData.append(files[0].name, files[0]);
                 fileData.append("statements_json", JSON.stringify(tableData));
 
@@ -232,8 +231,8 @@
                 });
             }
         }
-        //테이블 데이터 가져오기
-        function getTableData() {
+        /*테이블 데이터 가져오기*/
+        function GetTableData() {
             let data = new Array();
             let typeChk = true;
             $('#transactionsList tr').each(function () {
@@ -252,14 +251,15 @@
             return data;
         }
 
-        //테이블 채우기
-        function FillTable(result) {
-            CheckYearMonth(result);
+        /*테이블 채우기*/
+        function FillTable(result) {           
             let statements = result.statements;
             let options = result.options;
             let tableData = '';
             let optionsData = `<option value="">구분</option>`;
             let count = 0;
+
+            CheckDate(statements);
             options.forEach((element, index) => {
                 optionsData += `<option value="${element.Value}">${element.OptionName}</option>`;
             })
@@ -286,11 +286,37 @@
             });
         }
 
-        function CheckYearMonth(result) {
-            const year = result.statements[0].TransDate;
+        /*이용일시 데이터의 년,월 이 모두 같은지 확인*/
+        function CheckDate(statements) {
+            const str_c = statements[0].TransDate.split('.');
+            const year_c = str_c[0];
+            const month_c = str_c[1];
+
+            for (let i = 0; i < statements.length; i++) {
+                let str = statements[i].TransDate.split('.');
+                let year = str[0];
+                let month = str[1];
+                if (year_c !== year) {
+                    swal({
+                        title: "불러온 데이터의 이용일시가 유효하지 않습니다.",
+                        //text: "Check ID and PW again.",
+                        icon: "warning",
+                    });
+                    break;
+                }
+                else if (month_c !== month) {
+                    swal({
+                        title: "불러온 데이터의 이용일시가 유효하지 않습니다.",
+                        //text: "Check ID and PW again.",
+                        icon: "warning",
+                    });
+                    break;
+                }
+            }
         }
 
-        function check(re, what) {
+        /* 파일 이름 입력 체크*/
+        function CheckRegEx(re, what) {
             if (re.test(what)) {
                 return true;
             }
@@ -309,7 +335,7 @@
                 } else {    //old IE
                      filename = $(this).val().split('/').pop().split('\\').pop();   //파일명만 추출
                 }
-                getFileContent(filename);
+                GetFileContent(filename);
 
                 $(this).siblings('.upload-name').val(filename); //추출한 파일 명 삽입
             });
@@ -369,7 +395,7 @@
                         if ($(`select[name=saveType]`).val() == 1) {                          
                             let reg = /^[가-힣0-9a-zA-Z]+$/; //한글,영문,숫자만 되는것 
                             
-                            if (check(reg, $(`#fileName`).val())) {
+                            if (CheckRegEx(reg, $(`#fileName`).val())) {
                                 SaveJsoninServer(data, fileNameInput);  //새로운 파일이름 으로 저장
                             }
                             else {

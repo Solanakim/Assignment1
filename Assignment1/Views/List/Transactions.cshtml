@@ -130,14 +130,14 @@
                     var filename = $(this).val().split('/').pop().split('\\').pop();   //파일명만 추출
                 }
 
-                getFileContent(filename);
+                GetFileContent(filename);
 
                 $(this).siblings('.upload-name').val(filename); //추출한 파일 명 삽입
             });
 
 
-            //파일 서버로 보내기.
-            function getFileContent(fileName) {
+            /*파일 서버로 보내기.*/
+            function GetFileContent(fileName) {
                 const extension = getExtensionOfFilename(fileName);
                 if (extension == ".json" || extension == ".xls" || extension == ".xlsx") {
 
@@ -179,7 +179,7 @@
                 }
             }
 
-            //테이블 채우기
+            /*테이블 채우기*/
             function FillTable(result, extension) {               
                 let statements = result.statements;
                 let options = result.options;
@@ -340,7 +340,7 @@
 
 
         /*구분 옵션 가져오기.*/
-        function getOptions() {
+        function GetOptions() {
             $.ajax({
                 url: '/List/GetOptions',
                 type: "Get",
