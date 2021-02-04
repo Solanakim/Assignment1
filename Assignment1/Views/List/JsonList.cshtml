@@ -30,7 +30,7 @@
 </style>
 
 <!-- Page Heading/Breadcrumbs -->
-<h1 class="mt-4 mb-3">Transactions</h1>
+<h1 class="mt-4 mb-3">Json List</h1>
 
 <ol class="breadcrumb">
     <li class="breadcrumb-item">
@@ -43,8 +43,8 @@
     <!-- Sidebar Column -->
     <div class="col-lg-3 mb-4">
         <div class="list-group">
-            <a href="/List/Transactions" class="list-group-item">Transactions List</a>
-            <a href="/List/JsonList" class="list-group-item active">Json List</a>
+            <a href="/List/Transactions" class="list-group-item">Transactions</a>
+            <a href="#" id="jsonList_sideBar" class="list-group-item active">Json List</a>
         </div>
     </div>
     <div class="col-lg-9 mb-4">
@@ -82,36 +82,35 @@
 @section Scripts{
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script>
+        const id = sessionStorage.getItem("Id");
         function clickEvent(fileName) {
-            //console.log("eventListener");
-            //let fileName = event.target.innerText;          
-            window.open(`/List/Json?fileName=${fileName}`, `${fileName}`, "width=800, height=700, toolbar=no, menubar=no, scrollbars=no, resizable=yes");
+            window.open(`/List/Json?fileName=${fileName}&id=${id}`, `${fileName}`, "width=800, height=700, toolbar=no, menubar=no, scrollbars=no, resizable=yes");
         }
-
-
-        function FillTable(result) {
-            let tableData = ``;
-
-            if (result == `` || result == null) {
-                tableData += `<tr><td colspan="3">No Data</td></tr>`;
-            }
-            else {
-                result.forEach((element, index) => {
-                    tableData += `<tr>
-                                    <td>${(index + 1)}</td>
-                                    <td><a href="#" class="link" onclick="clickEvent('${element.FileName}')">${element.FileName}</a></td>
-                                    <td>${element.FileSize}</td>
-                                </tr>`;
-                })
-            }
-            $("#jsonList").append(tableData);
-            $(".paging-nav").empty();
-            $('.table').paging({ limit: 10 });
-
-        }
-
 
         $(document).ready(function () {
+
+            function FillTable(result) {
+                let tableData = ``;
+
+                if (result == `` || result == null) {
+                    tableData += `<tr><td colspan="3">No Data</td></tr>`;
+                }
+                else {
+                    result.forEach((element, index) => {
+                        tableData += `<tr>
+
+                                                <td>${(index + 1)}</td>
+
+                                                <td><a href="#" class="link" onclick="clickEvent('${element.FileName}')">${element.FileName}</a></td>
+                                            <td>${element.FileSize}</td>
+                                        </tr>`;
+                    })
+                }
+                $("#jsonList").append(tableData);
+                $(".paging-nav").empty();
+                $('.table').paging({ limit: 10 });
+
+            }
             var date = $('#date');
 
             date.on('change', function () {         //값이 변경되면
@@ -124,7 +123,7 @@
                     type: "POST",
                     contentType: "application/json", //json 데이터 보낼 때는 지정
                     processData: false, // Not to process data
-                    data: JSON.stringify({ "year": year, "month": month }),
+                    data: JSON.stringify({ "year": year, "month": month, "id": id }),
                     datatype: "json",
                     success: function (result) {
                         $(`#jsonList`).empty();

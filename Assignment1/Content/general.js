@@ -1,7 +1,8 @@
-﻿    function getParameterByName(name){
-        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
-        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+﻿//파라미터 가져오기
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 // 쿠키 생성 함수
@@ -38,10 +39,51 @@ function deleteCookie(cookieName) {
 }
 
 
+    let logoutUser = false;
+    let timeoutHnd = null;
+    let logouTimeInterval = 20 * 60 * 1000; // 15 mins here u can increase session time
+ 
+    function onuser_activite() {       
+        if (logoutUser) {
+            ;
+        }
+        else {
+            ResetLogOutTimer();
+        }
+    }
+    function OnTimeoutReached() {
+        logoutUser = true;
+        swal({
+            title: "세션 기간 만료로 로그아웃 되었습니다. 다시 로그인 해주세요.",
+            //text: "Check ID and PW again.",
+            icon: "warning",
+        }).then((result) => {
+            logout();
+        });
+    }
+    function ResetLogOutTimer() {
+        clearTimeout(timeoutHnd);
+        // set new timer
+        timeoutHnd = setTimeout('OnTimeoutReached();', logouTimeInterval);
+    }    
+
+    function sessionStart() {
+        //document.body.onclick = onuser_activite;
+        document.body.onmousemove = onuser_activite;
+        timeoutHnd = setTimeout('OnTimeoutReached();', logouTimeInterval);
+    }
+
+$(document).ready(function () {
+    const id = sessionStorage.getItem("Id");
+    if(id !==null || id !==undefined)
+        sessionStart();
+})
+
 //로그아웃
 function logout() {
+    clearTimeout(timeoutHnd);
     sessionStorage.removeItem("Id");
-    window.location.href = "/";
+    window.location.replace("/");
 }
 //파일 확장자 가져오기
 function getExtensionOfFilename(filename) {

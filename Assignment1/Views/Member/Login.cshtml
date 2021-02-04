@@ -129,7 +129,8 @@
                                 else {
                                     setCookie("Cookie_id", "", 0);
                                 }
-                                sessionStorage.setItem("Id", response.MemberID);
+                                sessionStorage.setItem("Id", response.Id);
+                                sessionStart();
                                 window.location.href = "/List/Transactions";
                             });
                         }

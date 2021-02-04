@@ -24,6 +24,11 @@ namespace HomePage.Controllers
             return View();
         }
 
+        /// <summary>
+        /// 파일을 받아서 거래내역 내용만 추출해서 view로 return(json, excel 파일)
+        /// </summary>
+        /// <param name="extension"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult GetFileContent(string extension)
         {
@@ -95,13 +100,19 @@ namespace HomePage.Controllers
             return Json("FAIL", JsonRequestBehavior.AllowGet);
         }
 
+
+        /// <summary>
+        /// 받아온 파일과 현재 테이블에 있는 데이터를 합친다. 단 중복되는 승인번호의 데이터는 합치지 않는다.
+        /// </summary>
+        /// <param name="statements_json"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult GetMergeData(string statements_json)
         {
             JavaScriptSerializer js = new JavaScriptSerializer();
             Transactions transactions = new Transactions();       
-            List<Statement> comparison = js.Deserialize<List<Statement>>(statements_json);
-            List<Statement> statements = js.Deserialize<List<Statement>>(statements_json);
+            List<Statement> comparison = js.Deserialize<List<Statement>>(statements_json);   //현재 테이블에 있는 데이터(비교본)
+            List<Statement> statements = js.Deserialize<List<Statement>>(statements_json);   //return할 데이터
             List<Options> options = db.Options.Where(c => c.Enabled == 1).OrderBy(o => o.Value).ToList();
             bool check = false;
             if (Request.Files.Count > 0)
@@ -187,21 +198,22 @@ namespace HomePage.Controllers
 
 
         /// <summary>
-        /// 
+        /// 테이블 데이터를 받아서 3가지 방식으로 json 파일로 저장한다.
         /// </summary>
         /// <param name="statement"></param>
         /// <param name="saveType">1-새로운 json파일 저장, 2-파일 이름 받아서 저장, 3-기존에 있는 파일 이름으로 저장</param>
         /// <param name="fileName"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult SaveAsJson(List<Json> statement,int saveType, string fileName)
+        public JsonResult SaveAsJson(string id,List<Json> statement,int saveType, string fileName)
         {
             string date = DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss");
+            statement = statement.OrderBy(x => x.TransDate).ToList();
             string jsondata = JsonConvert.SerializeObject(statement, Formatting.Indented);
             try
             {
-                Directory.CreateDirectory(Server.MapPath("~/JSON/"));
-                string path = Server.MapPath("~/JSON/");
+                Directory.CreateDirectory(Server.MapPath("~/JSON/" + id + "/"));
+                string path = Server.MapPath("~/JSON/" + id + "/");
 
                 if (saveType == 1)  //새로 저장
                     System.IO.File.WriteAllText(path + date + ".json", jsondata);
@@ -235,12 +247,17 @@ namespace HomePage.Controllers
             return Json("OK", JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// 저장한 JSON 파일들의 정보를 return 한다. 
+        /// </summary>
+        /// <returns></returns>
+
         [HttpGet]
-        public ActionResult JsonList()
+        public ActionResult JsonList(string id)
         {
             List<JsonFile> jsonFiles = new List<JsonFile>();
-
-            IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);
+            Directory.CreateDirectory(Server.MapPath("~/JSON/" + id + "/"));
+            IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/" + id + "/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);
 
             foreach (string s in files)
             {
@@ -270,14 +287,19 @@ namespace HomePage.Controllers
             return View(jsonFiles);
         }
 
-        /*파일 생성 날짜로 구분해서 가져오기*/
+        /// <summary>
+        /// 파일 생성 날짜로 구분해서 JSON 파일들의 정보를 return 한다
+        /// </summary>
+        /// <param name="month"></param>
+        /// <param name="year"></param>
+        /// <returns></returns>
         [HttpPost]
-        public JsonResult GetJsonListByDate(int month, int year)
+        public JsonResult GetJsonListByDate(int month, int year,string id)
         {
             List<JsonFile> jsonFiles = new List<JsonFile>();
             DateTime startDate = new DateTime(year, month, 1);
             DateTime endDate = startDate.AddMonths(1).AddDays(-1);
-            IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);
+            IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/" + id + "/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);
 
             foreach (string fi in files)
             {
@@ -325,11 +347,17 @@ namespace HomePage.Controllers
         //    return Json(jsonFiles, JsonRequestBehavior.AllowGet);
         //}
 
+        /// <summary>
+        /// 선택한 JSON 파일의 정보를 return 한다.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+
         [HttpGet]
-        public ActionResult Json(string fileName)
+        public ActionResult Json(string fileName, string id)
         {
             List<Statement> statements = new List<Statement>();
-            string filePath = Server.MapPath("~/JSON/") + fileName;
+            string filePath = Server.MapPath("~/JSON/" + id + "/") + fileName;
             using (StreamReader sr = new StreamReader(filePath))
             {
                 statements = JsonConvert.DeserializeObject<List<Statement>>(sr.ReadToEnd());

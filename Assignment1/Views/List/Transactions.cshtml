@@ -80,13 +80,13 @@
 
 <div class="row">
     <!-- Sidebar Column -->
-    <div class="col-lg-3 mb-4">
+    @*<div class="col-lg-3 mb-4">
         <div class="list-group">
             <a href="/List/Transactions" class="list-group-item active">Transactions List</a>
-            <a href="/List/JsonList" class="list-group-item">Json List</a>
+            <a href="#" id="jsonList_sideBar" class="list-group-item">Json List</a>
         </div>
-    </div>
-    <div class="col-lg-9 mb-4">
+    </div>*@
+    <div class="col-lg-12 mb-4">
 
         <form id="fileForm">
             <div id="fileBox" class="filebox bs3-primary">
@@ -101,7 +101,7 @@
             <table class="table table-bordered" style="width:100%;">
                 <thead>
                     <tr>
-                        <th width="15%">번호</th>
+                        <th width="10%">번호</th>
                         <th width="15%">승인번호</th>
                         <th width="20%">가맹점명</th>
                         <th width="20%">이용일시</th>
@@ -120,7 +120,9 @@
 
 @section Scripts{   
     <script>
+        const id = sessionStorage.getItem("Id");
         $(document).ready(function () {
+            
             var fileTarget = $('.filebox .upload-hidden');
 
             fileTarget.on('change', function () {         //값이 변경되면
@@ -261,7 +263,7 @@
                     type: "POST",
                     contentType: "application/json", //json 데이터 보낼 때는 지정
                     processData: false, // Not to process data
-                    data: JSON.stringify({ "statement": data, "saveType" : 1, "fileName" : "" }),
+                    data: JSON.stringify({ "statement": data, "saveType": 1, "fileName": "", "id": id}),
                     datatype: "json",
                     success: function (result) {
                         if (result == "OK") {
@@ -270,7 +272,7 @@
                                 //text: "Check ID and PW again.",
                                 icon: "success",
                             }).then((result) => {
-                                window.location.href = "/List/JsonList";
+                                window.location.href = `/List/JsonList?id=${id}`;
                             });
                         }
                         else {
