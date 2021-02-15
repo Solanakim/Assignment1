@@ -110,7 +110,7 @@ namespace HomePage.Controllers
         public JsonResult GetMergeData(string statements_json)
         {
             JavaScriptSerializer js = new JavaScriptSerializer();
-            Transactions transactions = new Transactions();       
+            Transactions transactions = new Transactions();
             List<Statement> comparison = js.Deserialize<List<Statement>>(statements_json);   //현재 테이블에 있는 데이터(비교본)
             List<Statement> statements = js.Deserialize<List<Statement>>(statements_json);   //return할 데이터
             List<Options> options = db.Options.Where(c => c.Enabled == 1).OrderBy(o => o.Value).ToList();
@@ -144,8 +144,8 @@ namespace HomePage.Controllers
                             {
                                 string rfnumber = reader.GetValue(2).ToString().Trim();
                                 foreach (Statement statement in comparison)
-                                {                                    
-                                    if(statement.ReferenceNumber == rfnumber || rfnumber == "승인번호")
+                                {
+                                    if (statement.ReferenceNumber == rfnumber || rfnumber == "승인번호")
                                     {
                                         check = false;
                                         break;
@@ -156,7 +156,7 @@ namespace HomePage.Controllers
                                     }
                                 }
 
-                                if(check == true)
+                                if (check == true)
                                 {
                                     statements.Add(new Statement
                                     {
@@ -205,15 +205,17 @@ namespace HomePage.Controllers
         /// <param name="fileName"></param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult SaveAsJson(string id,List<Json> statement,int saveType, string fileName)
+        public JsonResult SaveAsJson(string id, List<Json> statement, int saveType, string fileName)
         {
             string date = DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss");
+            string date_path = DateTime.Now.ToString("yyyy-MM");
+
             statement = statement.OrderBy(x => x.TransDate).ToList();
             string jsondata = JsonConvert.SerializeObject(statement, Formatting.Indented);
             try
             {
-                Directory.CreateDirectory(Server.MapPath("~/JSON/" + id + "/"));
-                string path = Server.MapPath("~/JSON/" + id + "/");
+                Directory.CreateDirectory(Server.MapPath("~/JSON/" + id + "/" + date_path + "/"));
+                string path = Server.MapPath("~/JSON/" + id + "/" + date_path + "/");
 
                 if (saveType == 1)  //새로 저장
                     System.IO.File.WriteAllText(path + date + ".json", jsondata);
@@ -221,7 +223,7 @@ namespace HomePage.Controllers
                     System.IO.File.WriteAllText(path + fileName + ".json", jsondata);
                 else if (saveType == 3)//기존 이름으로 덮어쓰기
                 {
-                    if (System.IO.File.Exists(path+fileName))
+                    if (System.IO.File.Exists(path + fileName))
                     {
                         // Use a try block to catch IOExceptions, to
                         // handle the case of the file already being
@@ -255,36 +257,37 @@ namespace HomePage.Controllers
         [HttpGet]
         public ActionResult JsonList(string id)
         {
-            List<JsonFile> jsonFiles = new List<JsonFile>();
-            Directory.CreateDirectory(Server.MapPath("~/JSON/" + id + "/"));
-            IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/" + id + "/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);
+            //List<JsonFile> jsonFiles = new List<JsonFile>();
+            //Directory.CreateDirectory(Server.MapPath("~/JSON/" + id + "/"));
+            //IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/" + id + "/"), "*.JSON", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime);
 
-            foreach (string s in files)
-            {
-                // Create the FileInfo object only when needed to ensure
-                // the information is as current as possible.
-                System.IO.FileInfo fi = null;
-                try
-                {
-                    fi = new System.IO.FileInfo(s);
-                    jsonFiles.Add(new JsonFile
-                    {
-                        FilePath = fi.FullName,
-                        FileName = fi.Name,
-                        FileSize = fi.Length.ToString(),
-                    });
+            //foreach (string s in files)
+            //{
+            //    // Create the FileInfo object only when needed to ensure
+            //    // the information is as current as possible.
+            //    System.IO.FileInfo fi = null;
+            //    try
+            //    {
+            //        fi = new System.IO.FileInfo(s);
+            //        jsonFiles.Add(new JsonFile
+            //        {
+            //            FilePath = fi.FullName,
+            //            FileName = fi.Name,
+            //            FileSize = fi.Length.ToString(),
+            //        });
 
-                }
-                catch (System.IO.FileNotFoundException e)
-                {
-                    // To inform the user and continue is
-                    // sufficient for this demonstration.
-                    // Your application may require different behavior.
-                    Console.WriteLine(e.Message);
-                }
-                Console.WriteLine("{0} : {1}", fi.Name, fi.Directory);
-            }
-            return View(jsonFiles);
+            //    }
+            //    catch (System.IO.FileNotFoundException e)
+            //    {
+            //        // To inform the user and continue is
+            //        // sufficient for this demonstration.
+            //        // Your application may require different behavior.
+            //        Console.WriteLine(e.Message);
+            //    }
+            //    Console.WriteLine("{0} : {1}", fi.Name, fi.Directory);
+            //}
+            //return View(jsonFiles);
+            return View();
         }
 
         /// <summary>
@@ -293,27 +296,60 @@ namespace HomePage.Controllers
         /// <param name="month"></param>
         /// <param name="year"></param>
         /// <returns></returns>
+        //[HttpPost]
+        //public JsonResult GetJsonListByDate(int month, int year,string id)
+        //{
+        //    List<JsonFile> jsonFiles = new List<JsonFile>();
+        //    DateTime startDate = new DateTime(year, month, 1);
+        //    DateTime endDate = startDate.AddMonths(1).AddDays(-1);
+        //    IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/" + id + "/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);
+
+        //    foreach (string fi in files)
+        //    {
+        //        FileInfo fileInfo = new FileInfo(fi);
+        //        if (fileInfo.CreationTime.Date >= startDate.Date && fileInfo.CreationTime.Date <= endDate.Date)
+        //        { //use directly flInfo.CreationTime and flInfo.Name without create another variable 
+        //            jsonFiles.Add(new JsonFile
+        //            {
+        //                FilePath = fileInfo.FullName,
+        //                FileName = fileInfo.Name,
+        //                FileSize = fileInfo.Length.ToString(),
+        //            });
+        //        }
+        //    }
+        //    return Json(jsonFiles, JsonRequestBehavior.AllowGet);
+        //} 
+
+
+        /// <summary>
+        /// 월별 폴더에서 JSON 파일들의 정보를 return 한다
+        /// </summary>
+        /// <param name="month"></param>
+        /// <param name="year"></param>
+        /// <returns></returns>
         [HttpPost]
-        public JsonResult GetJsonListByDate(int month, int year,string id)
+        public JsonResult GetJsonListByDate(int month, int year, string id)
         {
             List<JsonFile> jsonFiles = new List<JsonFile>();
-            DateTime startDate = new DateTime(year, month, 1);
-            DateTime endDate = startDate.AddMonths(1).AddDays(-1);
-            IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/" + id + "/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);
-
-            foreach (string fi in files)
+            string month_s = month < 10 ? "0" + month : "" + month;
+            if (Directory.Exists(Server.MapPath("~/JSON/" + id + "/" + year + "-" + month_s + "/")))
             {
-                FileInfo fileInfo = new FileInfo(fi);
-                if (fileInfo.CreationTime.Date >= startDate.Date && fileInfo.CreationTime.Date <= endDate.Date)
-                { //use directly flInfo.CreationTime and flInfo.Name without create another variable 
+                IOrderedEnumerable<string> files = System.IO.Directory.GetFiles(Server.MapPath("~/JSON/" + id + "/" + year + "-" + month_s + "/"), "*.JSON").OrderByDescending(f => new FileInfo(f).CreationTime);
+
+                foreach (string fi in files)
+                {
+                    FileInfo fileInfo = new FileInfo(fi);
+
                     jsonFiles.Add(new JsonFile
                     {
                         FilePath = fileInfo.FullName,
                         FileName = fileInfo.Name,
                         FileSize = fileInfo.Length.ToString(),
                     });
+
                 }
-            }
+                return Json(jsonFiles, JsonRequestBehavior.AllowGet);
+            }        
             return Json(jsonFiles, JsonRequestBehavior.AllowGet);
         }
 
@@ -352,17 +388,21 @@ namespace HomePage.Controllers
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-
         [HttpGet]
-        public ActionResult Json(string fileName, string id)
+        public ActionResult Json(string fileName, string id, int month, int year)
         {
             List<Statement> statements = new List<Statement>();
-            string filePath = Server.MapPath("~/JSON/" + id + "/") + fileName;
-            using (StreamReader sr = new StreamReader(filePath))
+            string month_s = month < 10 ? "0" + month : "" + month;
+            if (Directory.Exists(Server.MapPath("~/JSON/" + id + "/" + year + "-" + month_s + "/")))
             {
-                statements = JsonConvert.DeserializeObject<List<Statement>>(sr.ReadToEnd());
-            }
+                string filePath = Server.MapPath("~/JSON/" + id + "/" + year + "-" + month_s + "/") + fileName;
+                using (StreamReader sr = new StreamReader(filePath))
+                {
+                    statements = JsonConvert.DeserializeObject<List<Statement>>(sr.ReadToEnd());
+                }
 
+                return View(statements);
+            }
             return View(statements);
         }
     }

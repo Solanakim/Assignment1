@@ -59,7 +59,7 @@
                     </tr>
                 </thead>
                 <tbody id="jsonList">
-                    @{
+                    @*@{
                         int i = 0;
                         int idx = 0;
                     }
@@ -72,7 +72,7 @@
                             <td>@item.FileSize</td>
                         </tr>
                         i++;
-                    }
+                    }*@
                 </tbody>
             </table>
 
@@ -83,11 +83,21 @@
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script>
         const id = sessionStorage.getItem("Id");
+      
         function clickEvent(fileName) {
-            window.open(`/List/Json?fileName=${fileName}&id=${id}`, `${fileName}`, "width=800, height=700, toolbar=no, menubar=no, scrollbars=no, resizable=yes");
+            let date = new Date($('#date').val());         
+            let month = date.getMonth() + 1;
+            let year = date.getFullYear();
+
+            window.open(`/List/Json?fileName=${fileName}&id=${id}&year=${year}&month=${month}`, `${fileName}`, "width=1200, height=700, toolbar=no, menubar=no, scrollbars=no, resizable=yes");
         }
 
         $(document).ready(function () {
+            let date = $('#date');    
+            let today = new Date();
+            document.getElementById("date").value = today.getMonth() < 10 ? `${today.getFullYear()}-0${today.getMonth() + 1}` : `${today.getFullYear()}-${today.getMonth() + 1}`;
+            GetJsonList();
+            $('.table').paging({ limit: 10 });
 
             function FillTable(result) {
                 let tableData = ``;
@@ -111,9 +121,8 @@
                 $('.table').paging({ limit: 10 });
 
             }
-            var date = $('#date');
 
-            date.on('change', function () {         //값이 변경되면
+            function GetJsonList() {         //값이 변경되면
                 let date = new Date($('#date').val());
                 let day = date.getDate();
                 let month = date.getMonth() + 1;
@@ -134,9 +143,9 @@
                     }
                 });
 
-            })
-            $('.table').paging({ limit: 10 });
+            }
 
+            date.on('change', GetJsonList);
         })
 
     </script>

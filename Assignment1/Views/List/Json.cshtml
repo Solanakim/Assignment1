@@ -136,6 +136,22 @@
                 </tr>
             </thead>
             <tbody id="transactionsList" class="tableElement">
+                @{ 
+                    if(Model.ToArray().Length == 0)
+                    {
+                        <script>
+                            if (model.length == 0) {
+                                swal({
+                                    title: "잘못된 접근입니다.",
+                                    //text: "Check ID and PW again.",
+                                    icon: "warning",
+                                }).then((result) => {
+                                    window.location.href = "/";
+                                });
+                            }
+                        </script>
+                    }
+                }
                 @{
                     int i = 0;
                     int idx = 0;
@@ -180,6 +196,19 @@
     <script>
         const id = sessionStorage.getItem("Id");
         $(document).ready(function () {
+            @*let model = @Model;
+
+            if (model.length == 0) {
+                swal({
+                    title: "잘못된 접근입니다.",
+                    //text: "Check ID and PW again.",
+                    icon: "warning",
+                }).then((result) => {
+                    window.location.href = "/";
+                });
+            }*@
+
+
             /*테이블 데이터와 파일 데이터 머지*/
             function GetFileContent(fileName) {
                 const extension = getExtensionOfFilename(fileName);
@@ -205,8 +234,7 @@
                             $(".afterBrowse").css("display", "block");
                             $(".tableElement").empty();
 
-                            $("#tableHead").append(` <tr>
-                              <th width="3%"></th>
+                            $("#tableHead").append(`<tr><th width="3%"></th>
                             <th width="6%">번호</th>
                             <th width="10%">승인번호</th>
                             <th width="20%">가맹점명</th>
@@ -214,7 +242,6 @@
                             <th width="18%">구분</th>
                             <th width="10%">이용금액</th>
                             <th width="20%">비고</th>
-
                             </tr>`);
                             FillTable(result);
 
@@ -268,7 +295,8 @@
                 })
 
                 for (let i = 0; i < statements.length; i++) {
-                    tableData += `<tr>                          <td><input type="checkbox" name="deleteCk"/></td>
+                    tableData += `<tr>
+                                                                    <td><input type="checkbox" name="deleteCk"/></td>
                                                                     <td>${i + 1}</td>
                                                                     <td>${statements[i].ReferenceNumber}</td>
                                                                     <td>${statements[i].MerchantName}</td>
